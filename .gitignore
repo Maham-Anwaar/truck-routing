@@ -23,3 +23,14 @@ dist-ssr
 *.sln
 *.sw?
 .npm-cache/
+
+# Python / DRF backend (apps/api)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+db.sqlite3
+.env
+*.env.local
+.vite/
