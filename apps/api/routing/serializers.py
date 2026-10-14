@@ -29,3 +29,27 @@ class PlanRequestSerializer(serializers.Serializer):
         if abs(o["lat"] - d["lat"]) < 1e-6 and abs(o["lon"] - d["lon"]) < 1e-6:
             raise serializers.ValidationError("Destination must differ from origin.")
         return data
+
+
+class BboxSerializer(serializers.Serializer):
+    south = serializers.FloatField(min_value=-90, max_value=90)
+    west = serializers.FloatField(min_value=-180, max_value=180)
+    north = serializers.FloatField(min_value=-90, max_value=90)
+    east = serializers.FloatField(min_value=-180, max_value=180)
+
+
+class WeatherFieldRequestSerializer(serializers.Serializer):
+    bbox = BboxSerializer()
+    departure_utc = serializers.DateTimeField()
+    from_hour = serializers.IntegerField(default=0, min_value=0, max_value=48)
+    to_hour = serializers.IntegerField(default=48, min_value=0, max_value=48)
+    resolution_deg = serializers.FloatField(default=0.2, min_value=0.05, max_value=1.0)
+    load_lb = serializers.IntegerField(min_value=0, max_value=80000)
+
+    def validate(self, data):
+        b = data["bbox"]
+        if b["north"] <= b["south"] or b["east"] <= b["west"]:
+            raise serializers.ValidationError("bbox must have north > south and east > west.")
+        if data["to_hour"] < data["from_hour"]:
+            raise serializers.ValidationError("toHour must be >= fromHour.")
+        return data

@@ -2,7 +2,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from . import scoring
-from .serializers import PlanRequestSerializer
+from .serializers import PlanRequestSerializer, WeatherFieldRequestSerializer
+from .services import field as field_service
 from .services import places as places_service
 from .services import planner
 
@@ -39,5 +40,18 @@ class PlanView(APIView):
         v = req.validated_data
         result = planner.plan(
             v["origin"], v["destination"], v["departure_utc"], v["load_lb"], v["checkpoint_spacing_mi"]
+        )
+        return Response(result)
+
+
+class WeatherFieldView(APIView):
+    """POST /api/weather/field — per-hour risk grid over a bbox (heatmap)."""
+
+    def post(self, request):
+        req = WeatherFieldRequestSerializer(data=request.data)
+        req.is_valid(raise_exception=True)
+        v = req.validated_data
+        result = field_service.build_field(
+            v["bbox"], v["departure_utc"], v["from_hour"], v["to_hour"], v["resolution_deg"], v["load_lb"]
         )
         return Response(result)

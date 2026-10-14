@@ -3,6 +3,13 @@
 import math
 from datetime import datetime, timezone
 
+
+def iso_utc(dt):
+    """Format an instant as ISO-8601 UTC with a Z suffix."""
+    if dt.tzinfo is not None:
+        dt = dt.astimezone(timezone.utc)
+    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
 # Longitude scaling at the map's reference latitude (~38.9N): weights a degree
 # of longitude like a degree of latitude in the synthetic field + distances.
 COS = math.cos(math.radians(38.9))

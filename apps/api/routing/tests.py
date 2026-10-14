@@ -105,3 +105,32 @@ class PlanEndpointTests(SimpleTestCase):
         bad = {**DM_TRIP, "destination": DM_TRIP["origin"]}
         status, _ = _post(views.PlanView.as_view(), "/api/routes/plan", bad)
         self.assertEqual(status, 400)
+
+
+class WeatherFieldTests(SimpleTestCase):
+    FIELD_REQ = {
+        "bbox": {"south": 38.0, "west": -98.0, "north": 42.0, "east": -94.0},
+        "departureUtc": "2026-10-15T06:00:00Z",
+        "fromHour": 0,
+        "toHour": 3,
+        "resolutionDeg": 0.5,
+        "loadLb": 42000,
+    }
+
+    def test_grid_shape_and_values(self):
+        status, body = _post(views.WeatherFieldView.as_view(), "/api/weather/field", self.FIELD_REQ)
+        self.assertEqual(status, 200)
+        self.assertEqual(body["rows"], 8)  # (42-38)/0.5
+        self.assertEqual(body["cols"], 8)  # (-94 - -98)/0.5
+        self.assertEqual(len(body["frames"]), 4)  # hours 0..3
+        frame = body["frames"][0]
+        self.assertEqual(len(frame["risk"]), 8)
+        self.assertEqual(len(frame["risk"][0]), 8)
+        self.assertTrue(all(0 <= v <= 4 for row in frame["risk"] for v in row))
+        self.assertTrue(frame["validUtc"].endswith("Z"))
+
+    def test_trims_frames_beyond_horizon(self):
+        # Departure late enough that only a few hours fit in the 48 h window.
+        req = {**self.FIELD_REQ, "departureUtc": "2026-10-16T10:00:00Z", "toHour": 48}
+        _, body = _post(views.WeatherFieldView.as_view(), "/api/weather/field", req)
+        self.assertLess(len(body["frames"]), 10)
