@@ -1,36 +1,20 @@
 import { COS } from "./constants.js";
 
-// Known places the planner can route between. [label, lat, lon] -> {label,lat,lon}.
-export const PLACES = [
-  ["Dallas, TX", 32.78, -96.8],
-  ["Fort Worth, TX", 32.75, -97.33],
-  ["Oklahoma City, OK", 35.47, -97.52],
-  ["Tulsa, OK", 36.15, -95.99],
-  ["Wichita, KS", 37.69, -97.34],
-  ["Kansas City, MO", 39.1, -94.58],
-  ["Omaha, NE", 41.26, -95.94],
-  ["Lincoln, NE", 40.81, -96.7],
-  ["Des Moines, IA", 41.59, -93.62],
-  ["Minneapolis, MN", 44.98, -93.27],
-  ["Sioux Falls, SD", 43.55, -96.73],
-  ["St. Louis, MO", 38.63, -90.2],
-  ["Springfield, MO", 37.21, -93.29],
-  ["Little Rock, AR", 34.75, -92.29],
-  ["Amarillo, TX", 35.22, -101.83],
-  ["Denver, CO", 39.74, -104.99],
-  ["Chicago, IL", 41.88, -87.63],
-  ["Memphis, TN", 35.15, -90.05],
-  ["Salina, KS", 38.84, -97.61],
-  ["Joplin, MO", 37.08, -94.51],
-  ["Fargo, ND", 46.88, -96.79],
-  ["Houston, TX", 29.76, -95.37],
-  ["Austin, TX", 30.27, -97.74],
-  ["Minneola, FL", 28.57, -81.75],
-  ["Honolulu, HI", 21.31, -157.86],
-].map(([label, lat, lon]) => ({ label, lat, lon }));
+// Places come from the backend (GET /api/places) and are cached here at
+// startup via setPlaces(). No hardcoded place data lives in the frontend.
+let _places = [];
 
-// Cities drawn on the map (exclude far-flung/duplicate markers).
-export const MAP_CITIES = PLACES.filter((p) => !/FL|HI|Fort Worth/.test(p.label));
+export function setPlaces(list) {
+  _places = Array.isArray(list) ? list : [];
+}
+export function getPlaces() {
+  return _places;
+}
+
+// Cities drawn on the map (exclude far-flung markers).
+export function getMapCities() {
+  return _places.filter((p) => !/FL|HI|Fort Worth/.test(p.label));
+}
 
 // Decorative road network (polylines of [lat, lon]).
 export const ROADS = [

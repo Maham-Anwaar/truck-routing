@@ -13,7 +13,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { LV, GRAY } from "../../domain/levels.js";
-import { ROADS, MAP_CITIES, COS } from "../../domain/geo.js";
+import { ROADS, getMapCities, COS } from "../../domain/geo.js";
 import CheckpointPopover from "./CheckpointPopover.jsx";
 import styles from "./MapView.module.css";
 
@@ -83,7 +83,7 @@ function MapClicks({ picking, onPickCity, onClearPin }) {
         const { lat, lng } = e.latlng;
         let best = null,
           bd = Infinity;
-        MAP_CITIES.forEach((p) => {
+        getMapCities().forEach((p) => {
           const dd = (p.lat - lat) ** 2 + ((p.lon - lng) * COS) ** 2;
           if (dd < bd) {
             bd = dd;
@@ -105,7 +105,7 @@ function CityMarkers() {
   const [zoom, setZoom] = useState(map.getZoom());
   useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
   const showLabels = zoom >= 6;
-  return MAP_CITIES.map((p) => (
+  return getMapCities().map((p) => (
     <CircleMarker
       key={`city${p.label}`}
       center={[p.lat, p.lon]}

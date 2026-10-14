@@ -1,5 +1,5 @@
 import { DAYS, NOW } from "./constants.js";
-import { PLACES } from "./geo.js";
+import { getPlaces } from "./geo.js";
 
 // Time model: instants are epoch ms (UTC-based) — this is the "backend" data.
 // Inputs and labels are rendered in the VIEWER'S local timezone.
@@ -57,17 +57,18 @@ export function dur(h) {
 export function findPlace(s) {
   if (!s) return null;
   const q = s.trim().toLowerCase();
-  return PLACES.find((p) => p.label.toLowerCase() === q) || null;
+  return getPlaces().find((p) => p.label.toLowerCase() === q) || null;
 }
 
 // Autocomplete suggestions for a partial place query.
 export function suggest(s) {
   const q = (s || "").trim().toLowerCase();
   if (q.length < 3) return [];
-  const a = PLACES.filter((p) => p.label.toLowerCase().includes(q));
+  const places = getPlaces();
+  const a = places.filter((p) => p.label.toLowerCase().includes(q));
   if (a.length) return a.slice(0, 5);
   const k = q.slice(0, 3);
-  return PLACES.filter((p) => p.label.toLowerCase().startsWith(k)).slice(0, 3);
+  return places.filter((p) => p.label.toLowerCase().startsWith(k)).slice(0, 3);
 }
 
 // Load weight: format with thousands separators / parse to a number.

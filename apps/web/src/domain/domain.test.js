@@ -3,9 +3,22 @@ import { findPlace, suggest, dur, fmtLoad, loadNum } from "./format.js";
 import { risk } from "./weather.js";
 import { routeDefs, buildRoute, rank, MODES } from "./routes.js";
 import { isValidTrip, fieldError } from "./validation.js";
+import { setPlaces } from "./geo.js";
 import { NOW } from "./constants.js";
 
 const HORIZON = (dep) => 48 - (dep - NOW) / 3.6e6;
+
+// Places normally come from the API at runtime; seed the cache for tests.
+const TEST_PLACES = [
+  ["Dallas, TX", 32.78, -96.8],
+  ["Minneapolis, MN", 44.98, -93.27],
+  ["Minneola, FL", 28.57, -81.75],
+  ["Denver, CO", 39.74, -104.99],
+  ["Oklahoma City, OK", 35.47, -97.52],
+  ["Honolulu, HI", 21.31, -157.86],
+].map(([label, lat, lon]) => ({ label, lat, lon }));
+// Seed at module load (before describe bodies compute routes).
+setPlaces(TEST_PLACES);
 
 describe("format helpers", () => {
   it("looks up and suggests places", () => {
