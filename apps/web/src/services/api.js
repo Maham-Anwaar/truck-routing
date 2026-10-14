@@ -38,8 +38,12 @@ export async function fetchPlan(form, spacingMi) {
 }
 
 // Full place list — called once at startup to seed the place cache.
-export async function fetchAllPlaces() {
-  return (await get("/places")).places;
+// The promise is memoised so a double-invoked effect (React StrictMode in dev)
+// results in a single network request.
+let _placesPromise = null;
+export function fetchAllPlaces() {
+  if (!_placesPromise) _placesPromise = get("/places").then((r) => r.places);
+  return _placesPromise;
 }
 
 // Server-side autocomplete (available if we move off the cached list later).

@@ -8,6 +8,9 @@ import { isValidTrip } from "../domain/validation.js";
 // Departure defined in UTC (backend convention), shown in the viewer's tz.
 const DEP_DEFAULT = toLocalStr(Date.UTC(2026, 9, 15, 6, 0)); // Oct 15 06:00 UTC
 
+// First load starts empty — the user picks a trip. "Fill example" / the demo
+// trip is Dallas -> Minneapolis.
+const EMPTY_TRIP = { origin: "", dest: "", dep: DEP_DEFAULT, load: "42,000" };
 export const DEFAULT_TRIP = {
   origin: "Dallas, TX",
   dest: "Minneapolis, MN",
@@ -18,9 +21,9 @@ export const DEFAULT_TRIP = {
 // Plans trips by calling POST /routes/plan and adapting the response.
 // No synthetic routing/ranking runs in the frontend anymore.
 export function usePlanner(initialSpacing = 25) {
-  const [form, setForm] = useState(DEFAULT_TRIP);
-  const [committed, setCommitted] = useState(DEFAULT_TRIP);
-  const [phase, setPhase] = useState("loading"); // empty | loading | noRoute | error | results
+  const [form, setForm] = useState(EMPTY_TRIP);
+  const [committed, setCommitted] = useState(EMPTY_TRIP);
+  const [phase, setPhase] = useState("empty"); // empty | loading | noRoute | error | results
   const [data, setData] = useState(null);
   const [loadStep, setLoadStep] = useState(0);
   const [spacing, setSpacing] = useState(initialSpacing);
@@ -67,9 +70,10 @@ export function usePlanner(initialSpacing = 25) {
       });
   }, []);
 
-  // Plan the default trip on mount, and re-plan the committed trip when spacing changes.
+  // Re-plan the committed trip when spacing changes. Does nothing on first load
+  // (the trip starts empty) — no auto-plan until the user submits.
   useEffect(() => {
-    runPlan(committedRef.current);
+    if (isValidTrip(committedRef.current)) runPlan(committedRef.current);
   }, [spacing, runPlan]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
