@@ -10,9 +10,14 @@ later; swap via settings.ROUTING_PROVIDER.
 
 import math
 
+import requests
 from django.conf import settings
 
 from .geo import DALLAS, MINNEAPOLIS, near
+
+
+class NoRouteError(Exception):
+    """No drivable route exists between the two points (-> HTTP 404)."""
 
 # Hand-authored demo corridor Dallas <-> Minneapolis (ported from DM in routes.js).
 _DM = {
@@ -53,9 +58,59 @@ class SyntheticRoutingProvider:
         ]
 
 
+class OrsRoutingProvider:
+    """Real routing via OpenRouteService (truck/HGV profile), free tier."""
+
+    URL = "https://api.openrouteservice.org/v2/directions/driving-hgv/geojson"
+    _IDS = "ABC"
+
+    def __init__(self, api_key):
+        self.key = api_key
+
+    def routes(self, origin, dest):
+        body = {
+            # ORS uses [lon, lat] order.
+            "coordinates": [[origin["lon"], origin["lat"]], [dest["lon"], dest["lat"]]],
+            "alternative_routes": {"target_count": 3, "weight_factor": 1.6, "share_factor": 0.6},
+            "instructions": False,
+        }
+        try:
+            resp = requests.post(
+                self.URL,
+                json=body,
+                headers={"Authorization": self.key, "Content-Type": "application/json"},
+                timeout=20,
+            )
+        except requests.RequestException as e:  # network/timeout
+            raise RuntimeError(f"ORS request failed: {e}")
+        if resp.status_code == 404:
+            raise NoRouteError()
+        resp.raise_for_status()
+
+        features = resp.json().get("features", [])
+        if not features:
+            raise NoRouteError()
+
+        out = []
+        for idx, f in enumerate(features[:3]):
+            rid = self._IDS[idx]
+            # ORS geometry is [lon, lat]; the app uses [lat, lon].
+            geometry = [[c[1], c[0]] for c in f["geometry"]["coordinates"]]
+            summary = f["properties"]["summary"]
+            dist_mi = summary["distance"] / 1609.344
+            dur_hr = summary["duration"] / 3600
+            speed = round(dist_mi / dur_hr, 1) if dur_hr else 55
+            out.append({"id": rid, "name": f"Route {rid}", "speed_mph": speed, "geometry": geometry})
+        return out
+
+
 def get_routing_provider():
     which = getattr(settings, "ROUTING_PROVIDER", "synthetic")
     if which == "synthetic":
         return SyntheticRoutingProvider()
-    # e.g. "ors" -> OrsRoutingProvider() (same .routes interface, uses ORS_API_KEY)
+    if which == "ors":
+        key = getattr(settings, "ORS_API_KEY", "")
+        if not key:
+            raise RuntimeError("ROUTING_PROVIDER='ors' but ORS_API_KEY is not set")
+        return OrsRoutingProvider(key)
     raise NotImplementedError(f"ROUTING_PROVIDER='{which}' not implemented yet")

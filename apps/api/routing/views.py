@@ -1,11 +1,14 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from rest_framework import status
+
 from . import scoring
 from .serializers import PlanRequestSerializer, WeatherFieldRequestSerializer
 from .services import field as field_service
 from .services import places as places_service
 from .services import planner
+from .services.route_source import NoRouteError
 
 
 class HealthView(APIView):
@@ -38,9 +41,15 @@ class PlanView(APIView):
         req = PlanRequestSerializer(data=request.data)
         req.is_valid(raise_exception=True)
         v = req.validated_data
-        result = planner.plan(
-            v["origin"], v["destination"], v["departure_utc"], v["load_lb"], v["checkpoint_spacing_mi"]
-        )
+        try:
+            result = planner.plan(
+                v["origin"], v["destination"], v["departure_utc"], v["load_lb"], v["checkpoint_spacing_mi"]
+            )
+        except NoRouteError:
+            return Response(
+                {"detail": "No drivable route found between these places."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         return Response(result)
 
 

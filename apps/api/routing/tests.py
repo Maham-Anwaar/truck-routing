@@ -1,9 +1,11 @@
 import json
+from unittest.mock import MagicMock, patch
 
 from django.test import SimpleTestCase
 from rest_framework.test import APIRequestFactory
 
 from . import scoring, views
+from .services.route_source import NoRouteError, OrsRoutingProvider
 
 _factory = APIRequestFactory()
 
@@ -134,3 +136,31 @@ class WeatherFieldTests(SimpleTestCase):
         req = {**self.FIELD_REQ, "departureUtc": "2026-10-16T10:00:00Z", "toHour": 48}
         _, body = _post(views.WeatherFieldView.as_view(), "/api/weather/field", req)
         self.assertLess(len(body["frames"]), 10)
+
+
+class OrsProviderTests(SimpleTestCase):
+    @patch("routing.services.route_source.requests.post")
+    def test_maps_ors_response(self, mock_post):
+        mock_post.return_value = MagicMock(
+            status_code=200,
+            json=lambda: {
+                "features": [
+                    {
+                        "geometry": {"coordinates": [[-96.80, 32.78], [-95.0, 39.0], [-93.27, 44.98]]},
+                        "properties": {"summary": {"distance": 1_617_000, "duration": 59_000}},
+                    }
+                ]
+            },
+        )
+        routes = OrsRoutingProvider("fake-key").routes({"lat": 32.78, "lon": -96.80}, {"lat": 44.98, "lon": -93.27})
+        self.assertEqual(len(routes), 1)
+        r = routes[0]
+        self.assertEqual(r["id"], "A")
+        self.assertEqual(r["geometry"][0], [32.78, -96.80])  # [lon,lat] -> [lat,lon]
+        self.assertGreater(r["speed_mph"], 50)  # ~1004 mi / 16.4 h
+
+    @patch("routing.services.route_source.requests.post")
+    def test_no_features_raises_no_route(self, mock_post):
+        mock_post.return_value = MagicMock(status_code=200, json=lambda: {"features": []})
+        with self.assertRaises(NoRouteError):
+            OrsRoutingProvider("fake-key").routes({"lat": 1, "lon": 1}, {"lat": 2, "lon": 2})
