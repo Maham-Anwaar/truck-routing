@@ -55,6 +55,14 @@ export function usePlanner(initialSpacing = 25) {
         try {
           const grid = await fetchWeatherField(region.bbox, dto.departureUtc, dto.loadLb, region.resolutionDeg);
           planned.heat = buildHeatImage(grid, region.samples);
+          // Warm the remaining frames in the background so play/scrub is instant.
+          let hh = 1;
+          const warm = () => {
+            if (hh > 48 || id !== reqId.current) return;
+            planned.heat.frame(hh++);
+            timers.current.push(setTimeout(warm, 16));
+          };
+          timers.current.push(setTimeout(warm, 300));
         } catch {
           /* heatmap is optional — routes still render without it */
         }

@@ -40,7 +40,7 @@ const destIcon = L.divIcon({
   iconAnchor: [13, 13],
 });
 const truckIcon = L.divIcon({
-  className: "",
+  className: "wr-truck-marker", // CSS-transitions its position for smooth play
   html: `<span class="${styles.truck}">${ICON(TRUCK_D, 17)}</span>`,
   iconSize: [28, 28],
   iconAnchor: [14, 14],
@@ -192,7 +192,7 @@ export default function MapView({
 
       {/* Weather-risk heat field */}
       {heatUrl && (
-        <ImageOverlay url={heatUrl} bounds={data.heat.bounds} opacity={1} />
+        <ImageOverlay key="heat" url={heatUrl} bounds={data.heat.bounds} opacity={1} />
       )}
 
       {/* City dots with zoom-gated labels */}
@@ -305,8 +305,9 @@ export default function MapView({
       {/* Origin / destination pins */}
       {data?.routes[0] && (
         <>
-          <Marker position={data.routes[0].cps[0].ll} icon={originIcon} interactive={false} />
+          <Marker key="pin-origin" position={data.routes[0].cps[0].ll} icon={originIcon} interactive={false} />
           <Marker
+            key="pin-dest"
             position={data.routes[0].cps[data.routes[0].cps.length - 1].ll}
             icon={destIcon}
             interactive={false}
@@ -314,8 +315,8 @@ export default function MapView({
         </>
       )}
 
-      {/* Truck */}
-      {truck && <Marker position={truck} icon={truckIcon} interactive={false} />}
+      {/* Truck — keyed so it is never torn down/recreated between frames */}
+      {truck && <Marker key="truck" position={truck} icon={truckIcon} interactive={false} />}
     </MapContainer>
   );
 }

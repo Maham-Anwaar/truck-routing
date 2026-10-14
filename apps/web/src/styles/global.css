@@ -69,6 +69,14 @@ input {
   cursor: crosshair !important;
 }
 
+/* Truck glides between forecast steps instead of teleporting; no lag on zoom */
+.wr-truck-marker {
+  transition: transform 0.5s linear;
+}
+.leaflet-zoom-anim .wr-truck-marker {
+  transition: none;
+}
+
 .leaflet-bar a,
 .leaflet-bar a:hover {
   background: var(--color-surface);
