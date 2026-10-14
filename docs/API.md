@@ -438,6 +438,34 @@ Validation rules: origin ≠ destination; `0 ≤ loadLb ≤ 80000`;
   dataset — either is fine; the `label` round-trips as the UI's value.
 - **Enums:** `TextChoices` for `level`, `status`, `decidedBy`, `driver`.
 
+### 8.1 Chosen providers (backend)
+
+| Capability | Provider | Key? |
+| --- | --- | --- |
+| **Routing** (geometry + alternatives) | **OpenRouteService (ORS) free tier** | ✅ `ORS_API_KEY` (server-side only) |
+| **Weather** (point + grid) | **TBD** — NOAA/NWS (`api.weather.gov`) recommended (free, keyless, US) | — |
+| **Geocoding** (`/places`) | **`apps/api/data/places.json`** (static) | ❌ none |
+
+**Routing — OpenRouteService.** Use it to build the `routes` in `/routes/plan`;
+the checkpoints, weather, risk, and ranking are still computed by the backend
+(ORS only supplies the road geometry, distance, duration, and alternatives).
+
+- **Sign up** free at openrouteservice.org → get an API key. Put it in the DRF
+  env as `ORS_API_KEY`; send it as the `Authorization` header. **Never ship it
+  to the frontend.**
+- **Endpoint:** `POST /v2/directions/driving-hgv` — the **HGV (truck) profile**,
+  which fits the load model (later pass weight/height via `options`).
+- **Alternatives → A/B/C:** request `alternative_routes: { target_count: 3 }` in
+  one call; map the returned routes to ids `A`, `B`, `C`.
+- **Coordinate order:** ORS returns `[lon, lat]` (GeoJSON order). Our contract is
+  **`[lat, lon]`** — flip them when building `geometry`.
+- **Units:** ORS distance is **meters** (→ `distanceMi`), duration is **seconds**
+  (→ `durationHr`).
+- **Free-tier limits:** roughly **~2,000 requests/day** and a per-minute cap
+  (verify current limits on your ORS dashboard). **Cache by (origin, dest,
+  profile)** — road routes are stable, so caching keeps you well under the quota;
+  only the weather layer changes per departure/load.
+
 ---
 
 ## 9. What the frontend does with the response
