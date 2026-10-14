@@ -93,10 +93,12 @@
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  overflow: hidden;
   padding: var(--space-1);
+  max-height: 240px;
+  overflow-y: auto;
 }
-.acItem {
+.acItem,
+.acItemOn {
   display: block;
   width: 100%;
   text-align: left;
@@ -105,9 +107,22 @@
   font-size: 13px;
   color: var(--color-neutral-200);
 }
-.acItem:hover {
+.acItemOn {
   background: var(--color-accent-900);
   color: var(--color-neutral-100);
+}
+
+/* Dropdown caret inside the input */
+.acWrap .input {
+  padding-right: 28px;
+}
+.caret {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-neutral-500);
+  pointer-events: none;
 }
 
 /* Field error + suggestions */

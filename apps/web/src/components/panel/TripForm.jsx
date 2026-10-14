@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { ArrowsDownUp, Scales, WarningCircle, CircleNotch } from "@phosphor-icons/react";
-import { suggest, findPlace, fmtLoad, toLocalStr } from "../../domain/format.js";
-import { hav } from "../../domain/geo.js";
+import { useMemo, useRef, useState } from "react";
+import { ArrowsDownUp, Scales, WarningCircle, CircleNotch, CaretDown } from "@phosphor-icons/react";
+import { findPlace, fmtLoad, toLocalStr } from "../../domain/format.js";
+import { hav, getPlaces } from "../../domain/geo.js";
 import { routeDefs, MODES } from "../../domain/routes.js";
 import {
   isValidTrip,
@@ -18,18 +18,10 @@ const DEP_MAX = toLocalStr(DEP_MAX_MS - 2 * 6e4);
 
 export default function TripForm({ form, setField, setForm, phase, loadStep, onSubmit }) {
   const [touched, setTouched] = useState({});
-  const [active, setActive] = useState(null); // which field's autocomplete is open
 
   const isLoading = phase === "loading";
   const valid = isValidTrip(form);
   const touch = (k) => setTouched((t) => ({ ...t, [k]: true }));
-
-  // Autocomplete items for a place field (only while focused & inexact).
-  const acItems = (k) => {
-    const v = form[k];
-    if (active !== k || !v || v.length < 3 || findPlace(v)) return [];
-    return suggest(v);
-  };
 
   const errO = fieldError(form, touched, "origin");
   const errD = fieldError(form, touched, "dest");
@@ -39,7 +31,6 @@ export default function TripForm({ form, setField, setForm, phase, loadStep, onS
   const pick = (k, label) => {
     setField(k, label);
     setTouched((t) => ({ ...t, [k]: true }));
-    setActive(null);
   };
   const swap = () => setForm((f) => ({ ...f, origin: f.dest, dest: f.origin }));
   const fillExample = () => {
@@ -69,16 +60,8 @@ export default function TripForm({ form, setField, setForm, phase, loadStep, onS
           label="Origin"
           value={form.origin}
           err={errO}
-          items={acItems("origin")}
-          onChange={(v) => {
-            setField("origin", v);
-            setActive("origin");
-          }}
-          onFocus={() => setActive("origin")}
-          onBlur={() => {
-            setActive(null);
-            touch("origin");
-          }}
+          onChange={(v) => setField("origin", v)}
+          onBlur={() => touch("origin")}
           onPick={(label) => pick("origin", label)}
         />
         <button type="button" className={styles.swap} onClick={swap} aria-label="Swap origin and destination">
@@ -88,16 +71,8 @@ export default function TripForm({ form, setField, setForm, phase, loadStep, onS
           label="Destination"
           value={form.dest}
           err={errD}
-          items={acItems("dest")}
-          onChange={(v) => {
-            setField("dest", v);
-            setActive("dest");
-          }}
-          onFocus={() => setActive("dest")}
-          onBlur={() => {
-            setActive(null);
-            touch("dest");
-          }}
+          onChange={(v) => setField("dest", v)}
+          onBlur={() => touch("dest")}
           onPick={(label) => pick("dest", label)}
         />
       </div>
@@ -188,27 +163,89 @@ export default function TripForm({ form, setField, setForm, phase, loadStep, onS
   );
 }
 
-function PlaceField({ label, value, err, items, onChange, onFocus, onBlur, onPick }) {
+// Searchable dropdown over the (bounded) place list: click/focus to open the
+// full list, type to filter, arrow keys + Enter to pick.
+function PlaceField({ label, value, err, onChange, onBlur, onPick }) {
+  const [open, setOpen] = useState(false);
+  const [hi, setHi] = useState(0);
+  const blurTimer = useRef();
+
+  // Exact pick hides the list; otherwise filter by substring (case-insensitive).
+  const options = useMemo(() => {
+    const all = getPlaces();
+    const q = value.trim().toLowerCase();
+    const list = !q || findPlace(value) ? all : all.filter((p) => p.label.toLowerCase().includes(q));
+    return list;
+  }, [value]);
+
+  const choose = (label) => {
+    onPick(label);
+    setOpen(false);
+  };
+
+  const onKeyDown = (e) => {
+    if (!open && (e.key === "ArrowDown" || e.key === "Enter")) {
+      setOpen(true);
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHi((i) => Math.min(i + 1, options.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHi((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter" && options[hi]) {
+      e.preventDefault();
+      choose(options[hi].label);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  };
+
   return (
     <label className={styles.field}>
       <span className={styles.lbl}>{label}</span>
       <div className={styles.acWrap}>
         <input
           type="text"
+          role="combobox"
+          aria-expanded={open}
+          autoComplete="off"
           className={styles.input}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          placeholder="City, ST"
+          placeholder="Select a city…"
+          onChange={(e) => {
+            onChange(e.target.value);
+            setOpen(true);
+            setHi(0);
+          }}
+          onFocus={() => {
+            setOpen(true);
+            setHi(0);
+          }}
+          onBlur={() => {
+            // Delay so a mousedown on an option lands before we close.
+            blurTimer.current = setTimeout(() => setOpen(false), 120);
+            onBlur();
+          }}
+          onKeyDown={onKeyDown}
           style={err ? { boxShadow: "0 0 0 1px #e0464f" } : undefined}
         />
-        {items.length > 0 && (
-          <ul className={styles.ac}>
-            {items.map((p) => (
-              <li key={p.label}>
-                {/* onMouseDown so the pick fires before the input blur closes the list */}
-                <button type="button" className={styles.acItem} onMouseDown={(e) => { e.preventDefault(); onPick(p.label); }}>
+        <CaretDown size={14} className={styles.caret} />
+        {open && options.length > 0 && (
+          <ul className={styles.ac} role="listbox">
+            {options.map((p, i) => (
+              <li key={p.label} role="option" aria-selected={i === hi}>
+                <button
+                  type="button"
+                  className={i === hi ? styles.acItemOn : styles.acItem}
+                  onMouseEnter={() => setHi(i)}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    clearTimeout(blurTimer.current);
+                    choose(p.label);
+                  }}
+                >
                   {p.label}
                 </button>
               </li>
@@ -226,7 +263,10 @@ function PlaceField({ label, value, err, items, onChange, onFocus, onBlur, onPic
                   key={p.label}
                   type="button"
                   className={styles.sug}
-                  onMouseDown={(e) => { e.preventDefault(); onPick(p.label); }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    choose(p.label);
+                  }}
                 >
                   {p.label}
                 </button>
