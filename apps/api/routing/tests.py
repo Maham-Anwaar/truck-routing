@@ -1,0 +1,58 @@
+import json
+
+from django.test import SimpleTestCase
+from rest_framework.test import APIRequestFactory
+
+from . import scoring, views
+
+_factory = APIRequestFactory()
+
+
+def _get(view, path, params=None):
+    """Call a DRF view directly (no test client -> no contrib.auth dependency)."""
+    response = view(_factory.get(path, params or {}))
+    response.render()
+    return response.status_code, json.loads(response.content)
+
+
+class ScoringTests(SimpleTestCase):
+    def test_worst_of_factors(self):
+        self.assertEqual(scoring.classify(10, 0, 0, 0)["level"], "low")
+        self.assertEqual(scoring.classify(60, 0, 0, 0)["level"], "no_travel")
+        self.assertEqual(scoring.classify(0, 0.3, 0, 0)["driver"], "rain")
+
+    def test_load_escalation(self):
+        # 45-54 mph wind + >30,000 lb -> No Travel
+        self.assertEqual(scoring.classify(48, 0, 0, 35000)["level"], "no_travel")
+        # same wind, light load -> Severe
+        self.assertEqual(scoring.classify(48, 0, 0, 1000)["level"], "severe")
+        # 35-44 mph wind + >40,000 lb -> Severe, with a rule string
+        r = scoring.classify(40, 0, 0, 45000)
+        self.assertEqual(r["level"], "severe")
+        self.assertIsNotNone(r["escalation_rule"])
+
+
+class PlacesEndpointTests(SimpleTestCase):
+    def test_search_matches_label(self):
+        status, body = _get(views.PlacesView.as_view(), "/api/places", {"q": "denver"})
+        self.assertEqual(status, 200)
+        self.assertIn("Denver, CO", [p["label"] for p in body["places"]])
+
+    def test_short_query_is_empty(self):
+        _, body = _get(views.PlacesView.as_view(), "/api/places", {"q": "de"})
+        self.assertEqual(body["places"], [])
+
+
+class ConfigEndpointTests(SimpleTestCase):
+    def test_risk_levels(self):
+        status, body = _get(views.RiskLevelsView.as_view(), "/api/config/risk-levels")
+        self.assertEqual(status, 200)
+        self.assertEqual(len(body["levels"]), 5)
+        # camelCase renderer should expose levelIndex
+        self.assertEqual(body["levels"][0]["levelIndex"], 0)
+
+
+class HealthEndpointTests(SimpleTestCase):
+    def test_health(self):
+        _, body = _get(views.HealthView.as_view(), "/api/health")
+        self.assertEqual(body, {"status": "ok"})
