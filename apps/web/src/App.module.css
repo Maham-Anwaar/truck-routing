@@ -68,37 +68,6 @@
   color: var(--color-accent-200);
 }
 
-.scenario {
-  position: absolute;
-  top: var(--space-4);
-  left: var(--space-4);
-  z-index: 600;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-}
-.scenario span {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-neutral-500);
-}
-.scenario select {
-  font: inherit;
-  font-size: 12px;
-  color: var(--color-neutral-100);
-  background: var(--color-bg);
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 2px 4px;
-  color-scheme: dark;
-  cursor: pointer;
-}
-
 .emptyHint {
   position: absolute;
   top: 50%;

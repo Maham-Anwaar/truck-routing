@@ -1,8 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { ArrowsDownUp, Scales, WarningCircle, CircleNotch, CaretDown } from "@phosphor-icons/react";
 import { findPlace, fmtLoad, toLocalStr } from "../../domain/format.js";
-import { hav, getPlaces } from "../../domain/geo.js";
-import { routeDefs, MODES } from "../../domain/routes.js";
+import { getPlaces } from "../../domain/geo.js";
 import {
   isValidTrip,
   fieldError,
@@ -37,14 +36,6 @@ export default function TripForm({ form, setField, setForm, phase, loadStep, onS
     setForm({ origin: "Dallas, TX", dest: "Minneapolis, MN", dep: "2026-10-15T06:00", load: "42,000" });
     setTouched({});
   };
-
-  // Estimated checkpoint count for the loading copy.
-  const o = findPlace(form.origin),
-    d = findPlace(form.dest);
-  const cpEstimate =
-    o && d
-      ? Math.round((routeDefs(o, d, MODES.results).length * hav([o.lat, o.lon], [d.lat, d.lon]) * 1.2) / 25)
-      : "—";
 
   const submit = (e) => {
     e.preventDefault();
@@ -123,7 +114,7 @@ export default function TripForm({ form, setField, setForm, phase, loadStep, onS
       {/* Loading steps */}
       {isLoading && (
         <div className={styles.steps}>
-          {[{ label: "Finding routes" }, { label: `Checking weather at ${cpEstimate} checkpoints` }].map(
+          {[{ label: "Finding routes" }, { label: "Checking weather along the route" }].map(
             (s, i) => (
               <div
                 key={i}

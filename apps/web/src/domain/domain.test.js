@@ -1,13 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { findPlace, suggest, dur, fmtLoad, loadNum } from "./format.js";
 import { risk } from "./weather.js";
-import { routeDefs, buildRoute, rank, MODES } from "./routes.js";
 import { isValidTrip, fieldError } from "./validation.js";
 import { setPlaces } from "./geo.js";
-import { NOW } from "./constants.js";
 
-const HORIZON = (dep) => 48 - (dep - NOW) / 3.6e6;
-
+// Routing/ranking logic now lives in the backend (apps/api) and is tested there.
 // Places normally come from the API at runtime; seed the cache for tests.
 const TEST_PLACES = [
   ["Dallas, TX", 32.78, -96.8],
@@ -44,25 +41,6 @@ describe("risk classification", () => {
     expect(risk({ wind: 48, rain: 0, snow: 0 }, 35000).lv).toBe(4);
     // same wind, light load -> Severe only
     expect(risk({ wind: 48, rain: 0, snow: 0 }, 1000).lv).toBe(3);
-  });
-});
-
-describe("routing + ranking (Dallas -> Minneapolis)", () => {
-  const o = findPlace("Dallas, TX");
-  const d = findPlace("Minneapolis, MN");
-  const dep = Date.UTC(2026, 9, 15, 6, 0);
-  const routes = routeDefs(o, d, MODES.results).map((def) =>
-    buildRoute(def, 25, { load: 42000 }, MODES.results, HORIZON(dep)),
-  );
-
-  it("builds three routes with checkpoints", () => {
-    expect(routes).toHaveLength(3);
-    routes.forEach((r) => expect(r.cps.length).toBeGreaterThan(10));
-  });
-  it("recommends route A (fewest severe, fewest high, fastest)", () => {
-    const rk = rank(routes);
-    expect(rk.ranked[0].id).toBe("A");
-    expect(rk.ranked[0].sev).toBe(0);
   });
 });
 

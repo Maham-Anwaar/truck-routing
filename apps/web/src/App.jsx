@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Plus, Minus, ArrowsOut, MapTrifold } from "@phosphor-icons/react";
-import { usePlanner, SCENARIO_NAMES } from "./state/usePlanner.js";
+import { usePlanner } from "./state/usePlanner.js";
 import { useLayout } from "./state/useLayout.js";
 import MapView from "./components/map/MapView.jsx";
 import SidePanel from "./components/panel/SidePanel.jsx";
@@ -10,8 +10,7 @@ import Rail from "./components/layout/Rail.jsx";
 import styles from "./App.module.css";
 
 export default function App() {
-  const { form, setForm, setField, data, phase, loadStep, submit, scenario, applyScenario, spacing, setSpacing } =
-    usePlanner("results");
+  const { form, setForm, setField, data, phase, loadStep, submit, spacing, setSpacing } = usePlanner();
   const layout = useLayout();
 
   // UI state (kept out of the compute pipeline).
@@ -89,17 +88,6 @@ export default function App() {
         picking={picking}
         onPickCity={pickCity}
       />
-
-      <label className={styles.scenario}>
-        <span>Scenario</span>
-        <select value={scenario} onChange={(e) => applyScenario(e.target.value)}>
-          {SCENARIO_NAMES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </label>
 
       {!data && phase !== "loading" && (
         <div className={styles.emptyHint}>

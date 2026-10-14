@@ -107,6 +107,16 @@ export default function SidePanel({
         </div>
       )}
 
+      {phase === "error" && (
+        <div className={styles.banner}>
+          <RoadHorizon weight="fill" size={18} />
+          <div>
+            <strong>Couldn’t plan this trip.</strong>
+            <span>The routing service didn’t respond. Check the backend is running, then try again.</span>
+          </div>
+        </div>
+      )}
+
       {isResults && (
         <>
           <div className={styles.toolbar}>
