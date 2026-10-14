@@ -64,3 +64,44 @@ class HealthEndpointTests(SimpleTestCase):
     def test_health(self):
         _, body = _get(views.HealthView.as_view(), "/api/health")
         self.assertEqual(body, {"status": "ok"})
+
+
+DM_TRIP = {
+    "origin": {"lat": 32.78, "lon": -96.80},
+    "destination": {"lat": 44.98, "lon": -93.27},
+    "departureUtc": "2026-10-15T06:00:00Z",
+    "loadLb": 42000,
+    "checkpointSpacingMi": 25,
+}
+
+
+def _post(view, path, body):
+    response = view(_factory.post(path, body, format="json"))
+    response.render()
+    return response.status_code, json.loads(response.content)
+
+
+class PlanEndpointTests(SimpleTestCase):
+    def test_dallas_to_minneapolis_parity(self):
+        status, body = _post(views.PlanView.as_view(), "/api/routes/plan", DM_TRIP)
+        self.assertEqual(status, 200)
+        # Matches the frontend: 3 routes, A recommended with 0 severe miles.
+        self.assertEqual(len(body["routes"]), 3)
+        self.assertEqual(body["recommendedRouteId"], "A")
+        a = next(r for r in body["routes"] if r["id"] == "A")
+        self.assertEqual(a["summary"]["severeMi"], 0)
+        self.assertEqual(a["summary"]["highMi"], 150)
+        self.assertGreater(len(a["checkpoints"]), 10)
+        # camelCase + UTC checks
+        self.assertTrue(body["departureUtc"].endswith("Z"))
+        self.assertIn("windGustMph", a["checkpoints"][0]["weather"])
+
+    def test_rejects_out_of_range_departure(self):
+        bad = {**DM_TRIP, "departureUtc": "2026-10-20T06:00:00Z"}
+        status, _ = _post(views.PlanView.as_view(), "/api/routes/plan", bad)
+        self.assertEqual(status, 400)
+
+    def test_rejects_same_origin_destination(self):
+        bad = {**DM_TRIP, "destination": DM_TRIP["origin"]}
+        status, _ = _post(views.PlanView.as_view(), "/api/routes/plan", bad)
+        self.assertEqual(status, 400)

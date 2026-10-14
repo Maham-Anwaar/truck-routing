@@ -2,7 +2,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from . import scoring
+from .serializers import PlanRequestSerializer
 from .services import places as places_service
+from .services import planner
 
 
 class HealthView(APIView):
@@ -26,3 +28,16 @@ class RiskLevelsView(APIView):
 
     def get(self, request):
         return Response({"levels": scoring.LEVELS_CONFIG})
+
+
+class PlanView(APIView):
+    """POST /api/routes/plan — routes + checkpoints + weather + risk + ranking."""
+
+    def post(self, request):
+        req = PlanRequestSerializer(data=request.data)
+        req.is_valid(raise_exception=True)
+        v = req.validated_data
+        result = planner.plan(
+            v["origin"], v["destination"], v["departure_utc"], v["load_lb"], v["checkpoint_spacing_mi"]
+        )
+        return Response(result)

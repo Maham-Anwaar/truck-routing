@@ -38,6 +38,11 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = []
 WSGI_APPLICATION = "config.wsgi.application"
 
+# Everything is UTC on the wire (docs/API.md). Keep Django in UTC so DRF's
+# DateTimeField doesn't shift parsed instants into a local zone.
+TIME_ZONE = "UTC"
+USE_TZ = True
+
 # No models -> no database.
 DATABASES = {}
 

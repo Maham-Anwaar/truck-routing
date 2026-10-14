@@ -145,7 +145,7 @@ rank. This is where the weather + routing providers are called server-side.
     "avgRisk": 1.5,           // mean of (levelIndex + 1) over scored checkpoints
     "maxRiskLevel": "moderate",
     "riskBreakdownMi": {      // miles at each level; sums ≈ distanceMi
-      "low": 855, "moderate": 150, "high": 0, "severe": 0, "no_travel": 0, "no_data": 0
+      "low": 855, "moderate": 150, "high": 0, "severe": 0, "noTravel": 0, "noData": 0
     }
   },
   "checkpoints": [ /* Checkpoint objects */ ]
@@ -326,7 +326,7 @@ Dallas → Minneapolis, depart `2026-10-15T06:00:00Z`, 42,000 lb, 25 mi spacing.
       "geometry": [[32.78,-96.80],[35.47,-97.52],[39.10,-94.58],[41.59,-93.62],[44.98,-93.27]],
       "summary": {
         "severeMi": 0, "highMi": 150, "avgRisk": 1.5, "maxRiskLevel": "moderate",
-        "riskBreakdownMi": { "low": 855, "moderate": 150, "high": 0, "severe": 0, "no_travel": 0, "no_data": 0 }
+        "riskBreakdownMi": { "low": 855, "moderate": 150, "high": 0, "severe": 0, "noTravel": 0, "noData": 0 }
       },
       "checkpoints": [
         {
