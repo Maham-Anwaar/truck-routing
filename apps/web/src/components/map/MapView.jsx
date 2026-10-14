@@ -143,7 +143,7 @@ export default function MapView({
 
   // Current heat frame for the scrubbed hour.
   const heatUrl = useMemo(() => {
-    if (!data || !heatOn) return null;
+    if (!data || !heatOn || !data.heat) return null;
     return data.heat.frame(hour);
   }, [data, heatOn, hour]);
 

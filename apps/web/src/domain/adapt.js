@@ -1,11 +1,9 @@
 // Maps a POST /routes/plan response (docs/API.md) into the internal `data`
 // shape the components render. The backend ships clean route/checkpoint data;
 // the frontend derives render geometry (segments, interpolation, badge) from it.
-//
-// NOTE: the heatmap is still built client-side here (buildHeat) until
-// POST /weather/field exists — that's the one remaining synthetic piece.
+// The heatmap (data.heat) is attached separately by usePlanner after fetching
+// POST /weather/field.
 import { hav } from "./geo.js";
-import { buildHeat } from "./heat.js";
 
 const RISK_INDEX = { low: 0, moderate: 1, high: 2, severe: 3, no_travel: 4 };
 const STATUS = { ok: "ok", no_data: "nodata", beyond_forecast: "beyond" };
@@ -15,7 +13,6 @@ const RULE_INDEX = {
   lowest_average_risk: 2,
   shortest_time: 3,
 };
-const DEFAULT_MODE = { I: 1, spread: 1 };
 
 // Cumulative great-circle distance along a [lat,lon][] polyline.
 function cumulative(points) {
@@ -108,7 +105,7 @@ export function adaptPlan(dto) {
 
   return {
     routes,
-    heat: buildHeat(routes, DEFAULT_MODE, dto.loadLb, horizon),
+    heat: null, // attached by usePlanner from POST /weather/field
     horizon,
     dep: depMs,
     ranked: dto.ranking.order.map((id) => byId[id]),

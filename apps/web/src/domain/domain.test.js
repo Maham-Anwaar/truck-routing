@@ -1,10 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { findPlace, suggest, dur, fmtLoad, loadNum } from "./format.js";
-import { risk } from "./weather.js";
 import { isValidTrip, fieldError } from "./validation.js";
 import { setPlaces } from "./geo.js";
 
-// Routing/ranking logic now lives in the backend (apps/api) and is tested there.
+// Routing/ranking + risk scoring now live in the backend (apps/api), tested there.
 // Places normally come from the API at runtime; seed the cache for tests.
 const TEST_PLACES = [
   ["Dallas, TX", 32.78, -96.8],
@@ -27,20 +26,6 @@ describe("format helpers", () => {
     expect(dur(16.47)).toBe("16 h 30 min");
     expect(fmtLoad("42000")).toBe("42,000");
     expect(loadNum("42,000")).toBe(42000);
-  });
-});
-
-describe("risk classification", () => {
-  it("takes the worst of wind/rain/snow", () => {
-    expect(risk({ wind: 10, rain: 0, snow: 0 }, 0).lv).toBe(0);
-    expect(risk({ wind: 60, rain: 0, snow: 0 }, 0).lv).toBe(4);
-    expect(risk({ wind: 0, rain: 0.3, snow: 0 }, 0).driver).toBe("rain");
-  });
-  it("applies load-weight escalation", () => {
-    // 45–54 mph wind with >30,000 lb -> No Travel
-    expect(risk({ wind: 48, rain: 0, snow: 0 }, 35000).lv).toBe(4);
-    // same wind, light load -> Severe only
-    expect(risk({ wind: 48, rain: 0, snow: 0 }, 1000).lv).toBe(3);
   });
 });
 

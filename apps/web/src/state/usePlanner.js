@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchPlan } from "../services/api.js";
+import { fetchPlan, fetchWeatherField } from "../services/api.js";
 import { adaptPlan } from "../domain/adapt.js";
+import { heatRegion, buildHeatImage } from "../domain/heat.js";
 import { toLocalStr } from "../domain/format.js";
 import { isValidTrip } from "../domain/validation.js";
 
@@ -43,10 +44,20 @@ export function usePlanner(initialSpacing = 25) {
     setData(null);
     timers.current.push(setTimeout(() => setLoadStep(1), 500));
     fetchPlan(trip, spacingRef.current)
-      .then((dto) => {
+      .then(async (dto) => {
+        if (id !== reqId.current) return;
+        const planned = adaptPlan(dto);
+        // Heatmap: fetch the risk grid for the route region, then colour it.
+        const region = heatRegion(planned.routes);
+        try {
+          const grid = await fetchWeatherField(region.bbox, dto.departureUtc, dto.loadLb, region.resolutionDeg);
+          planned.heat = buildHeatImage(grid, region.samples);
+        } catch {
+          /* heatmap is optional — routes still render without it */
+        }
         if (id !== reqId.current) return;
         setCommitted(trip);
-        setData(adaptPlan(dto));
+        setData(planned);
         setPhase("results");
       })
       .catch((err) => {

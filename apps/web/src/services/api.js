@@ -47,6 +47,17 @@ export async function searchPlaces(q) {
   return (await get(`/places?q=${encodeURIComponent(q)}`)).places;
 }
 
+// Per-hour risk grid for the heatmap over a bbox.
+export async function fetchWeatherField(bbox, departureUtc, loadLb, resolutionDeg) {
+  const res = await fetch(`${BASE}/weather/field`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ bbox, departureUtc, loadLb, resolutionDeg, fromHour: 0, toHour: 48 }),
+  });
+  if (!res.ok) throw new Error(`weather field ${res.status}`);
+  return res.json();
+}
+
 export async function fetchRiskLevels() {
   return (await get("/config/risk-levels")).levels;
 }

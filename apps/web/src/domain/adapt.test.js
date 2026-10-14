@@ -1,9 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-
-// buildHeat uses a canvas (no DOM in tests); stub it.
-vi.mock("./heat.js", () => ({ buildHeat: () => ({ frame: () => null, bounds: [[0, 0], [1, 1]] }) }));
-
-const { adaptPlan } = await import("./adapt.js");
+import { describe, it, expect } from "vitest";
+import { adaptPlan } from "./adapt.js";
 
 const DTO = {
   departureUtc: "2026-10-15T06:00:00Z",
