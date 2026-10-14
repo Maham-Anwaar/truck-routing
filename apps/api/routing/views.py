@@ -13,11 +13,12 @@ class HealthView(APIView):
 
 
 class PlacesView(APIView):
-    """GET /api/places?q= — autocomplete over the static place list."""
+    """GET /api/places — full list; GET /api/places?q= — autocomplete."""
 
     def get(self, request):
-        q = request.query_params.get("q", "")
-        return Response({"places": places_service.search(q)})
+        q = request.query_params.get("q")
+        places = places_service.all_places() if q is None else places_service.search(q)
+        return Response({"places": places})
 
 
 class RiskLevelsView(APIView):

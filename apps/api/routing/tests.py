@@ -42,6 +42,14 @@ class PlacesEndpointTests(SimpleTestCase):
         _, body = _get(views.PlacesView.as_view(), "/api/places", {"q": "de"})
         self.assertEqual(body["places"], [])
 
+    def test_no_query_returns_full_list(self):
+        _, body = _get(views.PlacesView.as_view(), "/api/places")
+        labels = [p["label"] for p in body["places"]]
+        # superset: state capitals + the demo cities the web app needs
+        self.assertGreaterEqual(len(labels), 60)
+        for need in ("Dallas, TX", "Minneapolis, MN", "Saint Paul, MN"):
+            self.assertIn(need, labels)
+
 
 class ConfigEndpointTests(SimpleTestCase):
     def test_risk_levels(self):

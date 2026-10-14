@@ -70,7 +70,10 @@ Colors/glyphs for these are **frontend-only** — do not send them.
 ### 3.1 `GET /api/places?q=<query>`
 
 Autocomplete / geocode for the origin & destination fields. Match on name.
-Return at most ~5. `q` under 3 chars → empty list.
+Return at most ~8. `q` under 3 chars → empty list. **Omitting `q` entirely
+returns the full list** — the frontend calls this once at startup to cache the
+places (so it can resolve coordinates for a picked trip without a round-trip per
+keystroke).
 
 ```json
 {

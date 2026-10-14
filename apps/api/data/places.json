@@ -1,156 +1,20 @@
 {
   "places": [
     {
-      "id": "montgomery-al",
-      "name": "Montgomery",
-      "region": "AL",
-      "label": "Montgomery, AL",
-      "lat": 32.3668,
-      "lon": -86.3
+      "id": "albany-ny",
+      "name": "Albany",
+      "region": "NY",
+      "label": "Albany, NY",
+      "lat": 42.6526,
+      "lon": -73.7562
     },
     {
-      "id": "juneau-ak",
-      "name": "Juneau",
-      "region": "AK",
-      "label": "Juneau, AK",
-      "lat": 58.3019,
-      "lon": -134.4197
-    },
-    {
-      "id": "phoenix-az",
-      "name": "Phoenix",
-      "region": "AZ",
-      "label": "Phoenix, AZ",
-      "lat": 33.4484,
-      "lon": -112.074
-    },
-    {
-      "id": "little-rock-ar",
-      "name": "Little Rock",
-      "region": "AR",
-      "label": "Little Rock, AR",
-      "lat": 34.7465,
-      "lon": -92.2896
-    },
-    {
-      "id": "sacramento-ca",
-      "name": "Sacramento",
-      "region": "CA",
-      "label": "Sacramento, CA",
-      "lat": 38.5816,
-      "lon": -121.4944
-    },
-    {
-      "id": "denver-co",
-      "name": "Denver",
-      "region": "CO",
-      "label": "Denver, CO",
-      "lat": 39.7392,
-      "lon": -104.9903
-    },
-    {
-      "id": "hartford-ct",
-      "name": "Hartford",
-      "region": "CT",
-      "label": "Hartford, CT",
-      "lat": 41.7658,
-      "lon": -72.6734
-    },
-    {
-      "id": "dover-de",
-      "name": "Dover",
-      "region": "DE",
-      "label": "Dover, DE",
-      "lat": 39.1582,
-      "lon": -75.5244
-    },
-    {
-      "id": "tallahassee-fl",
-      "name": "Tallahassee",
-      "region": "FL",
-      "label": "Tallahassee, FL",
-      "lat": 30.4383,
-      "lon": -84.2807
-    },
-    {
-      "id": "atlanta-ga",
-      "name": "Atlanta",
-      "region": "GA",
-      "label": "Atlanta, GA",
-      "lat": 33.749,
-      "lon": -84.388
-    },
-    {
-      "id": "honolulu-hi",
-      "name": "Honolulu",
-      "region": "HI",
-      "label": "Honolulu, HI",
-      "lat": 21.3069,
-      "lon": -157.8583
-    },
-    {
-      "id": "boise-id",
-      "name": "Boise",
-      "region": "ID",
-      "label": "Boise, ID",
-      "lat": 43.615,
-      "lon": -116.2023
-    },
-    {
-      "id": "springfield-il",
-      "name": "Springfield",
-      "region": "IL",
-      "label": "Springfield, IL",
-      "lat": 39.7817,
-      "lon": -89.6501
-    },
-    {
-      "id": "indianapolis-in",
-      "name": "Indianapolis",
-      "region": "IN",
-      "label": "Indianapolis, IN",
-      "lat": 39.7684,
-      "lon": -86.1581
-    },
-    {
-      "id": "des-moines-ia",
-      "name": "Des Moines",
-      "region": "IA",
-      "label": "Des Moines, IA",
-      "lat": 41.5868,
-      "lon": -93.625
-    },
-    {
-      "id": "topeka-ks",
-      "name": "Topeka",
-      "region": "KS",
-      "label": "Topeka, KS",
-      "lat": 39.0473,
-      "lon": -95.6752
-    },
-    {
-      "id": "frankfort-ky",
-      "name": "Frankfort",
-      "region": "KY",
-      "label": "Frankfort, KY",
-      "lat": 38.2009,
-      "lon": -84.8733
-    },
-    {
-      "id": "baton-rouge-la",
-      "name": "Baton Rouge",
-      "region": "LA",
-      "label": "Baton Rouge, LA",
-      "lat": 30.4515,
-      "lon": -91.1871
-    },
-    {
-      "id": "augusta-me",
-      "name": "Augusta",
-      "region": "ME",
-      "label": "Augusta, ME",
-      "lat": 44.3106,
-      "lon": -69.7795
+      "id": "amarillo-tx",
+      "name": "Amarillo",
+      "region": "TX",
+      "label": "Amarillo, TX",
+      "lat": 35.22,
+      "lon": -101.83
     },
     {
       "id": "annapolis-md",
@@ -161,6 +25,54 @@
       "lon": -76.4922
     },
     {
+      "id": "atlanta-ga",
+      "name": "Atlanta",
+      "region": "GA",
+      "label": "Atlanta, GA",
+      "lat": 33.749,
+      "lon": -84.388
+    },
+    {
+      "id": "augusta-me",
+      "name": "Augusta",
+      "region": "ME",
+      "label": "Augusta, ME",
+      "lat": 44.3106,
+      "lon": -69.7795
+    },
+    {
+      "id": "austin-tx",
+      "name": "Austin",
+      "region": "TX",
+      "label": "Austin, TX",
+      "lat": 30.27,
+      "lon": -97.74
+    },
+    {
+      "id": "baton-rouge-la",
+      "name": "Baton Rouge",
+      "region": "LA",
+      "label": "Baton Rouge, LA",
+      "lat": 30.4515,
+      "lon": -91.1871
+    },
+    {
+      "id": "bismarck-nd",
+      "name": "Bismarck",
+      "region": "ND",
+      "label": "Bismarck, ND",
+      "lat": 46.8083,
+      "lon": -100.7837
+    },
+    {
+      "id": "boise-id",
+      "name": "Boise",
+      "region": "ID",
+      "label": "Boise, ID",
+      "lat": 43.615,
+      "lon": -116.2023
+    },
+    {
       "id": "boston-ma",
       "name": "Boston",
       "region": "MA",
@@ -169,20 +81,164 @@
       "lon": -71.0589
     },
     {
-      "id": "lansing-mi",
-      "name": "Lansing",
-      "region": "MI",
-      "label": "Lansing, MI",
-      "lat": 42.7325,
-      "lon": -84.5555
+      "id": "carson-city-nv",
+      "name": "Carson City",
+      "region": "NV",
+      "label": "Carson City, NV",
+      "lat": 39.1638,
+      "lon": -119.7674
     },
     {
-      "id": "saint-paul-mn",
-      "name": "Saint Paul",
-      "region": "MN",
-      "label": "Saint Paul, MN",
-      "lat": 44.9537,
-      "lon": -93.09
+      "id": "charleston-wv",
+      "name": "Charleston",
+      "region": "WV",
+      "label": "Charleston, WV",
+      "lat": 38.3498,
+      "lon": -81.6326
+    },
+    {
+      "id": "cheyenne-wy",
+      "name": "Cheyenne",
+      "region": "WY",
+      "label": "Cheyenne, WY",
+      "lat": 41.14,
+      "lon": -104.8202
+    },
+    {
+      "id": "chicago-il",
+      "name": "Chicago",
+      "region": "IL",
+      "label": "Chicago, IL",
+      "lat": 41.88,
+      "lon": -87.63
+    },
+    {
+      "id": "columbia-sc",
+      "name": "Columbia",
+      "region": "SC",
+      "label": "Columbia, SC",
+      "lat": 34.0007,
+      "lon": -81.0348
+    },
+    {
+      "id": "columbus-oh",
+      "name": "Columbus",
+      "region": "OH",
+      "label": "Columbus, OH",
+      "lat": 39.9612,
+      "lon": -82.9988
+    },
+    {
+      "id": "concord-nh",
+      "name": "Concord",
+      "region": "NH",
+      "label": "Concord, NH",
+      "lat": 43.2081,
+      "lon": -71.5376
+    },
+    {
+      "id": "dallas-tx",
+      "name": "Dallas",
+      "region": "TX",
+      "label": "Dallas, TX",
+      "lat": 32.78,
+      "lon": -96.8
+    },
+    {
+      "id": "denver-co",
+      "name": "Denver",
+      "region": "CO",
+      "label": "Denver, CO",
+      "lat": 39.74,
+      "lon": -104.99
+    },
+    {
+      "id": "des-moines-ia",
+      "name": "Des Moines",
+      "region": "IA",
+      "label": "Des Moines, IA",
+      "lat": 41.59,
+      "lon": -93.62
+    },
+    {
+      "id": "dover-de",
+      "name": "Dover",
+      "region": "DE",
+      "label": "Dover, DE",
+      "lat": 39.1582,
+      "lon": -75.5244
+    },
+    {
+      "id": "fargo-nd",
+      "name": "Fargo",
+      "region": "ND",
+      "label": "Fargo, ND",
+      "lat": 46.88,
+      "lon": -96.79
+    },
+    {
+      "id": "fort-worth-tx",
+      "name": "Fort Worth",
+      "region": "TX",
+      "label": "Fort Worth, TX",
+      "lat": 32.75,
+      "lon": -97.33
+    },
+    {
+      "id": "frankfort-ky",
+      "name": "Frankfort",
+      "region": "KY",
+      "label": "Frankfort, KY",
+      "lat": 38.2009,
+      "lon": -84.8733
+    },
+    {
+      "id": "harrisburg-pa",
+      "name": "Harrisburg",
+      "region": "PA",
+      "label": "Harrisburg, PA",
+      "lat": 40.2732,
+      "lon": -76.8867
+    },
+    {
+      "id": "hartford-ct",
+      "name": "Hartford",
+      "region": "CT",
+      "label": "Hartford, CT",
+      "lat": 41.7658,
+      "lon": -72.6734
+    },
+    {
+      "id": "helena-mt",
+      "name": "Helena",
+      "region": "MT",
+      "label": "Helena, MT",
+      "lat": 46.5891,
+      "lon": -112.0391
+    },
+    {
+      "id": "honolulu-hi",
+      "name": "Honolulu",
+      "region": "HI",
+      "label": "Honolulu, HI",
+      "lat": 21.31,
+      "lon": -157.86
+    },
+    {
+      "id": "houston-tx",
+      "name": "Houston",
+      "region": "TX",
+      "label": "Houston, TX",
+      "lat": 29.76,
+      "lon": -95.37
+    },
+    {
+      "id": "indianapolis-in",
+      "name": "Indianapolis",
+      "region": "IN",
+      "label": "Indianapolis, IN",
+      "lat": 39.7684,
+      "lon": -86.1581
     },
     {
       "id": "jackson-ms",
@@ -201,188 +257,52 @@
       "lon": -92.1735
     },
     {
-      "id": "helena-mt",
-      "name": "Helena",
-      "region": "MT",
-      "label": "Helena, MT",
-      "lat": 46.5891,
-      "lon": -112.0391
+      "id": "joplin-mo",
+      "name": "Joplin",
+      "region": "MO",
+      "label": "Joplin, MO",
+      "lat": 37.08,
+      "lon": -94.51
+    },
+    {
+      "id": "juneau-ak",
+      "name": "Juneau",
+      "region": "AK",
+      "label": "Juneau, AK",
+      "lat": 58.3019,
+      "lon": -134.4197
+    },
+    {
+      "id": "kansas-city-mo",
+      "name": "Kansas City",
+      "region": "MO",
+      "label": "Kansas City, MO",
+      "lat": 39.1,
+      "lon": -94.58
+    },
+    {
+      "id": "lansing-mi",
+      "name": "Lansing",
+      "region": "MI",
+      "label": "Lansing, MI",
+      "lat": 42.7325,
+      "lon": -84.5555
     },
     {
       "id": "lincoln-ne",
       "name": "Lincoln",
       "region": "NE",
       "label": "Lincoln, NE",
-      "lat": 40.8136,
-      "lon": -96.7026
+      "lat": 40.81,
+      "lon": -96.7
     },
     {
-      "id": "carson-city-nv",
-      "name": "Carson City",
-      "region": "NV",
-      "label": "Carson City, NV",
-      "lat": 39.1638,
-      "lon": -119.7674
-    },
-    {
-      "id": "concord-nh",
-      "name": "Concord",
-      "region": "NH",
-      "label": "Concord, NH",
-      "lat": 43.2081,
-      "lon": -71.5376
-    },
-    {
-      "id": "trenton-nj",
-      "name": "Trenton",
-      "region": "NJ",
-      "label": "Trenton, NJ",
-      "lat": 40.2206,
-      "lon": -74.7597
-    },
-    {
-      "id": "santa-fe-nm",
-      "name": "Santa Fe",
-      "region": "NM",
-      "label": "Santa Fe, NM",
-      "lat": 35.687,
-      "lon": -105.9378
-    },
-    {
-      "id": "albany-ny",
-      "name": "Albany",
-      "region": "NY",
-      "label": "Albany, NY",
-      "lat": 42.6526,
-      "lon": -73.7562
-    },
-    {
-      "id": "raleigh-nc",
-      "name": "Raleigh",
-      "region": "NC",
-      "label": "Raleigh, NC",
-      "lat": 35.7796,
-      "lon": -78.6382
-    },
-    {
-      "id": "bismarck-nd",
-      "name": "Bismarck",
-      "region": "ND",
-      "label": "Bismarck, ND",
-      "lat": 46.8083,
-      "lon": -100.7837
-    },
-    {
-      "id": "columbus-oh",
-      "name": "Columbus",
-      "region": "OH",
-      "label": "Columbus, OH",
-      "lat": 39.9612,
-      "lon": -82.9988
-    },
-    {
-      "id": "oklahoma-city-ok",
-      "name": "Oklahoma City",
-      "region": "OK",
-      "label": "Oklahoma City, OK",
-      "lat": 35.4676,
-      "lon": -97.5164
-    },
-    {
-      "id": "salem-or",
-      "name": "Salem",
-      "region": "OR",
-      "label": "Salem, OR",
-      "lat": 44.9429,
-      "lon": -123.0351
-    },
-    {
-      "id": "harrisburg-pa",
-      "name": "Harrisburg",
-      "region": "PA",
-      "label": "Harrisburg, PA",
-      "lat": 40.2732,
-      "lon": -76.8867
-    },
-    {
-      "id": "providence-ri",
-      "name": "Providence",
-      "region": "RI",
-      "label": "Providence, RI",
-      "lat": 41.824,
-      "lon": -71.4128
-    },
-    {
-      "id": "columbia-sc",
-      "name": "Columbia",
-      "region": "SC",
-      "label": "Columbia, SC",
-      "lat": 34.0007,
-      "lon": -81.0348
-    },
-    {
-      "id": "pierre-sd",
-      "name": "Pierre",
-      "region": "SD",
-      "label": "Pierre, SD",
-      "lat": 44.3683,
-      "lon": -100.351
-    },
-    {
-      "id": "nashville-tn",
-      "name": "Nashville",
-      "region": "TN",
-      "label": "Nashville, TN",
-      "lat": 36.1627,
-      "lon": -86.7816
-    },
-    {
-      "id": "austin-tx",
-      "name": "Austin",
-      "region": "TX",
-      "label": "Austin, TX",
-      "lat": 30.2672,
-      "lon": -97.7431
-    },
-    {
-      "id": "salt-lake-city-ut",
-      "name": "Salt Lake City",
-      "region": "UT",
-      "label": "Salt Lake City, UT",
-      "lat": 40.7608,
-      "lon": -111.891
-    },
-    {
-      "id": "montpelier-vt",
-      "name": "Montpelier",
-      "region": "VT",
-      "label": "Montpelier, VT",
-      "lat": 44.2601,
-      "lon": -72.5754
-    },
-    {
-      "id": "richmond-va",
-      "name": "Richmond",
-      "region": "VA",
-      "label": "Richmond, VA",
-      "lat": 37.5407,
-      "lon": -77.436
-    },
-    {
-      "id": "olympia-wa",
-      "name": "Olympia",
-      "region": "WA",
-      "label": "Olympia, WA",
-      "lat": 47.0379,
-      "lon": -122.9007
-    },
-    {
-      "id": "charleston-wv",
-      "name": "Charleston",
-      "region": "WV",
-      "label": "Charleston, WV",
-      "lat": 38.3498,
-      "lon": -81.6326
+      "id": "little-rock-ar",
+      "name": "Little Rock",
+      "region": "AR",
+      "label": "Little Rock, AR",
+      "lat": 34.75,
+      "lon": -92.29
     },
     {
       "id": "madison-wi",
@@ -393,12 +313,228 @@
       "lon": -89.4012
     },
     {
-      "id": "cheyenne-wy",
-      "name": "Cheyenne",
-      "region": "WY",
-      "label": "Cheyenne, WY",
-      "lat": 41.14,
-      "lon": -104.8202
+      "id": "memphis-tn",
+      "name": "Memphis",
+      "region": "TN",
+      "label": "Memphis, TN",
+      "lat": 35.15,
+      "lon": -90.05
+    },
+    {
+      "id": "minneapolis-mn",
+      "name": "Minneapolis",
+      "region": "MN",
+      "label": "Minneapolis, MN",
+      "lat": 44.98,
+      "lon": -93.27
+    },
+    {
+      "id": "minneola-fl",
+      "name": "Minneola",
+      "region": "FL",
+      "label": "Minneola, FL",
+      "lat": 28.57,
+      "lon": -81.75
+    },
+    {
+      "id": "montgomery-al",
+      "name": "Montgomery",
+      "region": "AL",
+      "label": "Montgomery, AL",
+      "lat": 32.3668,
+      "lon": -86.3
+    },
+    {
+      "id": "montpelier-vt",
+      "name": "Montpelier",
+      "region": "VT",
+      "label": "Montpelier, VT",
+      "lat": 44.2601,
+      "lon": -72.5754
+    },
+    {
+      "id": "nashville-tn",
+      "name": "Nashville",
+      "region": "TN",
+      "label": "Nashville, TN",
+      "lat": 36.1627,
+      "lon": -86.7816
+    },
+    {
+      "id": "oklahoma-city-ok",
+      "name": "Oklahoma City",
+      "region": "OK",
+      "label": "Oklahoma City, OK",
+      "lat": 35.47,
+      "lon": -97.52
+    },
+    {
+      "id": "olympia-wa",
+      "name": "Olympia",
+      "region": "WA",
+      "label": "Olympia, WA",
+      "lat": 47.0379,
+      "lon": -122.9007
+    },
+    {
+      "id": "omaha-ne",
+      "name": "Omaha",
+      "region": "NE",
+      "label": "Omaha, NE",
+      "lat": 41.26,
+      "lon": -95.94
+    },
+    {
+      "id": "phoenix-az",
+      "name": "Phoenix",
+      "region": "AZ",
+      "label": "Phoenix, AZ",
+      "lat": 33.4484,
+      "lon": -112.074
+    },
+    {
+      "id": "pierre-sd",
+      "name": "Pierre",
+      "region": "SD",
+      "label": "Pierre, SD",
+      "lat": 44.3683,
+      "lon": -100.351
+    },
+    {
+      "id": "providence-ri",
+      "name": "Providence",
+      "region": "RI",
+      "label": "Providence, RI",
+      "lat": 41.824,
+      "lon": -71.4128
+    },
+    {
+      "id": "raleigh-nc",
+      "name": "Raleigh",
+      "region": "NC",
+      "label": "Raleigh, NC",
+      "lat": 35.7796,
+      "lon": -78.6382
+    },
+    {
+      "id": "richmond-va",
+      "name": "Richmond",
+      "region": "VA",
+      "label": "Richmond, VA",
+      "lat": 37.5407,
+      "lon": -77.436
+    },
+    {
+      "id": "sacramento-ca",
+      "name": "Sacramento",
+      "region": "CA",
+      "label": "Sacramento, CA",
+      "lat": 38.5816,
+      "lon": -121.4944
+    },
+    {
+      "id": "saint-paul-mn",
+      "name": "Saint Paul",
+      "region": "MN",
+      "label": "Saint Paul, MN",
+      "lat": 44.9537,
+      "lon": -93.09
+    },
+    {
+      "id": "salem-or",
+      "name": "Salem",
+      "region": "OR",
+      "label": "Salem, OR",
+      "lat": 44.9429,
+      "lon": -123.0351
+    },
+    {
+      "id": "salina-ks",
+      "name": "Salina",
+      "region": "KS",
+      "label": "Salina, KS",
+      "lat": 38.84,
+      "lon": -97.61
+    },
+    {
+      "id": "salt-lake-city-ut",
+      "name": "Salt Lake City",
+      "region": "UT",
+      "label": "Salt Lake City, UT",
+      "lat": 40.7608,
+      "lon": -111.891
+    },
+    {
+      "id": "santa-fe-nm",
+      "name": "Santa Fe",
+      "region": "NM",
+      "label": "Santa Fe, NM",
+      "lat": 35.687,
+      "lon": -105.9378
+    },
+    {
+      "id": "sioux-falls-sd",
+      "name": "Sioux Falls",
+      "region": "SD",
+      "label": "Sioux Falls, SD",
+      "lat": 43.55,
+      "lon": -96.73
+    },
+    {
+      "id": "springfield-il",
+      "name": "Springfield",
+      "region": "IL",
+      "label": "Springfield, IL",
+      "lat": 39.7817,
+      "lon": -89.6501
+    },
+    {
+      "id": "springfield-mo",
+      "name": "Springfield",
+      "region": "MO",
+      "label": "Springfield, MO",
+      "lat": 37.21,
+      "lon": -93.29
+    },
+    {
+      "id": "st-louis-mo",
+      "name": "St. Louis",
+      "region": "MO",
+      "label": "St. Louis, MO",
+      "lat": 38.63,
+      "lon": -90.2
+    },
+    {
+      "id": "tallahassee-fl",
+      "name": "Tallahassee",
+      "region": "FL",
+      "label": "Tallahassee, FL",
+      "lat": 30.4383,
+      "lon": -84.2807
+    },
+    {
+      "id": "topeka-ks",
+      "name": "Topeka",
+      "region": "KS",
+      "label": "Topeka, KS",
+      "lat": 39.0473,
+      "lon": -95.6752
+    },
+    {
+      "id": "trenton-nj",
+      "name": "Trenton",
+      "region": "NJ",
+      "label": "Trenton, NJ",
+      "lat": 40.2206,
+      "lon": -74.7597
+    },
+    {
+      "id": "tulsa-ok",
+      "name": "Tulsa",
+      "region": "OK",
+      "label": "Tulsa, OK",
+      "lat": 36.15,
+      "lon": -95.99
     },
     {
       "id": "washington-dc",
@@ -407,6 +543,14 @@
       "label": "Washington, DC",
       "lat": 38.9072,
       "lon": -77.0369
+    },
+    {
+      "id": "wichita-ks",
+      "name": "Wichita",
+      "region": "KS",
+      "label": "Wichita, KS",
+      "lat": 37.69,
+      "lon": -97.34
     }
   ]
 }

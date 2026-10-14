@@ -13,6 +13,11 @@ def _all():
     return json.loads(_DATA.read_text())["places"]
 
 
+def all_places():
+    """The full list — used by the frontend to bootstrap its place cache."""
+    return _all()
+
+
 def search(q, limit=8):
     """Autocomplete: case-insensitive label match; empty for queries under 3 chars."""
     q = (q or "").strip().lower()
