@@ -67,13 +67,14 @@ class OrsRoutingProvider:
     def __init__(self, api_key):
         self.key = api_key
 
-    def routes(self, origin, dest):
+    def _request(self, origin, dest, alternatives):
+        # ORS uses [lon, lat] order.
         body = {
-            # ORS uses [lon, lat] order.
             "coordinates": [[origin["lon"], origin["lat"]], [dest["lon"], dest["lat"]]],
-            "alternative_routes": {"target_count": 3, "weight_factor": 1.6, "share_factor": 0.6},
             "instructions": False,
         }
+        if alternatives:
+            body["alternative_routes"] = {"target_count": 3, "weight_factor": 1.6, "share_factor": 0.6}
         try:
             resp = requests.post(
                 self.URL,
@@ -83,13 +84,23 @@ class OrsRoutingProvider:
             )
         except requests.RequestException as e:  # network/timeout
             raise RuntimeError(f"ORS request failed: {e}")
+        # Free tier caps alternatives at ~100 km routes (error 2004) — signal a
+        # retry without alternatives.
+        if resp.status_code == 400 and alternatives:
+            if (resp.json().get("error") or {}).get("code") == 2004:
+                return None
         if resp.status_code == 404:
             raise NoRouteError()
         resp.raise_for_status()
-
         features = resp.json().get("features", [])
         if not features:
             raise NoRouteError()
+        return features
+
+    def routes(self, origin, dest):
+        features = self._request(origin, dest, alternatives=True)
+        if features is None:  # route too long for the alternatives algorithm
+            features = self._request(origin, dest, alternatives=False)
 
         out = []
         for idx, f in enumerate(features[:3]):
