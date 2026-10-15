@@ -1,340 +1,324 @@
 <div align="center">
 
-# 🚚 Truck Routing — Walkthrough & Cram Sheet
+# 🚚 Truck Routing — Explained Simply
 
-**Your friend built the whole thing. Here's everything you need to pass the quiz.**
+**I built this. You're getting quizzed on it. Let me explain it like you've never seen the code — because you haven't.**
 
 </div>
 
 > [!NOTE]
-> Read this once, glance at the diagrams, skim the 30-second version right before
-> you walk in. The boxes marked **💡 If they ask** are ready-made answers — just
-> say them. Everything here is honest, including the trade-offs (that's usually
-> what they're really probing).
+> No assumed knowledge. I define every word the first time I use it. Read it once,
+> and the boxes marked **💡 Say this** are literally what to say if they ask.
 
 ---
 
-## 📍 Contents
-
-1. [What it even is](#-what-it-even-is)
-2. [How a plan happens](#-how-a-plan-happens-the-money-question) ← the money question
-3. [What they grade](#-what-theyre-grading)
-   - [① Routes, weather, risk & recommendation (40%)](#-routes-weather-risk--recommendation--40)
-   - [② Map & heatmap smoothness (40%)](#-map--heatmap-smoothness--the-other-40)
-   - [③ Code quality (15%)](#-code-quality--15)
-   - [④ Docs (5%)](#-docs--5)
-4. [The "why did you…?" cheat sheet](#-the-why-did-you-cheat-sheet)
-5. [Don't get caught off guard](#-dont-get-caught-off-guard)
-6. [30-second version](#-30-second-version)
+## Contents
+1. [What the app does](#what-the-app-does)
+2. [The two halves: screen + brain](#the-two-halves-screen--brain)
+3. [How it figures out a plan (step by step)](#how-it-figures-out-a-plan-step-by-step)
+4. [The map and the smooth animation](#the-map-and-the-smooth-animation)
+5. [The weather heatmap](#the-weather-heatmap)
+6. [The honest bits (don't get caught off guard)](#the-honest-bits-dont-get-caught-off-guard)
+7. [Quick Q&A](#quick-qa)
+8. [30-second version](#30-second-version)
 
 ---
 
-## 🧠 What it even is
+## What the app does
 
-A **truck route planner that cares about the weather**. You enter where you're
-starting, where you're going, when you leave, and how heavy the load is. It gives
-you a few route options, checks the weather *along each route*, scores how risky
-each one is, and tells you which to take — on a map, with a scrubable 48-hour
-weather heatmap.
+You tell it: **where you're starting, where you're going, when you're leaving, and
+how heavy your truck is.** It then:
+
+1. Comes up with a few possible routes.
+2. Checks the **weather along each route** — not right now, but *for the time the
+   truck will actually be at each spot*.
+3. Decides how **dangerous** each route is (wind, rain, snow — worse for a heavy
+   truck).
+4. **Recommends** the safest one, without making it way slower.
+5. Shows it all on a **map**, plus a **weather "heat" cloud** you can play forward
+   through the next 48 hours.
+
+That's the whole product. Everything below is *how*.
+
+---
+
+## The two halves: screen + brain
+
+Every app like this has two parts that talk to each other over the internet:
+
+| Part | Plain-English | In our app |
+| --- | --- | --- |
+| **Frontend** | The screen you look at and click. Runs in your browser. | React + a map library called Leaflet |
+| **Backend** | The "brain" running on a server somewhere else. Does the real work. | Python (Django) |
+
+Think of a **restaurant**: the **frontend is the dining room** (menus, tables, what
+you see), the **backend is the kitchen** (where the food is actually made). They
+talk through a **waiter** — in software that's called an **API** (just a way for
+the screen to ask the brain questions and get answers back).
 
 > [!TIP]
-> **The one sentence that makes you sound like you get it:**
-> *"The backend does all the thinking — routing, weather, risk, ranking — and
-> hands the frontend clean JSON. The frontend just draws it. No logic is
-> duplicated across the two."*
->
-> If you remember nothing else, remember that.
+> **💡 Say this if they ask about the design:**
+> *"The backend does all the thinking — routes, weather, risk, which one to
+> recommend — and sends the frontend simple, ready-to-draw answers. The frontend
+> just draws them. I deliberately kept all the brains in one place so the two sides
+> can't disagree."*
 
 ```mermaid
 flowchart LR
-    U([You]) --> W["🖥️ Web<br/>React + Leaflet"]
-    W -->|"asks for a plan"| A["⚙️ API<br/>Django + DRF"]
-    A --> R[Routing provider]
-    A --> WX[Weather provider]
-    A -->|"routes + risk + ranking,<br/>ready to draw"| W
+    U([You click Plan]) --> W["🖥️ Frontend<br/>(the screen)"]
+    W -->|"asks a question"| A["⚙️ Backend<br/>(the brain)"]
+    A -->|"a ready-to-draw answer"| W
     W --> U
 ```
 
 ---
 
-## 🔄 How a plan happens (the money question)
+## How it figures out a plan (step by step)
 
-If they ask *"what happens when I hit Plan?"* — walk this top to bottom. It's not
-complicated:
+This is the important part. Go slowly; each step is simple on its own.
 
-```mermaid
-sequenceDiagram
-    participant You as 🖥️ Web
-    participant API as ⚙️ /routes/plan
-    participant R as 🛣️ Routing
-    participant WX as 🌦️ Weather
-    You->>API: from, to, departure, load, spacing
-    API->>R: give me routes
-    R-->>API: up to 3 routes (roads + how fast)
-    Note over API: chop each route into checkpoints<br/>every 10 / 25 / 50 miles
-    Note over API: for each checkpoint:<br/>ETA = miles ÷ speed
-    API->>WX: weather at ALL checkpoints (ONE call)
-    WX-->>API: wind / rain / snow at each ETA
-    Note over API: score risk, rank the routes
-    API-->>You: the whole plan as JSON
-```
+### Step 1 — Get some routes
 
-The part to really *get* is the **ETA step** — it's the heart of the assignment.
-Keep reading. 👇
-
----
-
-## 🎯 What they're grading
-
-They literally weight it. Spend your energy on the two 40s.
-
-| Weight | Area |
-| :---: | --- |
-| **40%** | Routes, weather, risk & recommendation logic |
-| **40%** | Map & heatmap smoothness and performance |
-| 15% | Code quality |
-| 5% | Docs & walkthrough |
-
----
-
-### ① Routes, weather, risk & recommendation — 40%
-
-#### 🛣️ Routes
-
-We ask a routing provider for up to 3 routes. Here's the backstory to have ready —
-it's a great answer because it shows judgment:
-
-> [!TIP]
-> **💡 If they ask about the routing API:**
-> *"I wired up the real OpenRouteService API with the truck profile — real roads,
-> real truck ETAs. But its free tier only returns **alternative** routes for trips
-> under 100 km, and a real haul is 1,600 km, so you only get one route back. The
-> whole app is about **comparing** routes, so I default to a synthetic router that
-> makes 3 plausible corridors, and kept the real one swappable. Self-host the
-> routing engine and the cap goes away."*
->
-> Lead with this — don't hide it. Hitting a real API limit and making a call is
-> exactly what they want to see.
-
-#### 🌦️ Weather at the ETA — ⭐ THE ONE THEY CARE ABOUT
-
-We don't check the weather *now*. We check it for *when the truck will actually be
-at that spot*.
-
-```
-ETA to this checkpoint       = miles so far ÷ route speed
-clock time the truck is there = departure time + ETA
-→ look up the weather for THAT hour, at THAT spot
-```
-
-So mile 500 on a 60 mph route is scored against the forecast **8 hours after you
-leave**, not right now.
+A **route** is just the path from A to B. To get real paths, the backend asks a
+**routing service** — think of it as *Google Maps directions, but as a tool our
+code can call*. You give it two points, it gives you back the roads to follow and
+**how long the drive takes**.
 
 > [!IMPORTANT]
-> **Where does "speed" come from? The user doesn't give it — the *route* does.**
-> The real router returns the route's distance + duration (so `speed = distance ÷
-> duration`); synthetic routes have a speed baked in. Either way, by the time we
-> sample checkpoints we know the speed, and ETA is just `miles ÷ speed`.
+> **The tricky bit people miss: the user never types in a speed.** The *routing
+> service tells us* how far the route is and how long it takes — so we can work out
+> the speed ourselves (distance ÷ time). The route "knows" its own speed.
+
+Why do we want **3** routes? So we can *compare* them and pick the safest. (More on
+a real-world snag with this in step 1b.)
+
+### Step 1b — A real-world catch (good story for the quiz)
+
+We hooked up a real routing service (**OpenRouteService**) with a *truck* setting,
+so it respects things like truck weight limits. **But** its free plan only gives
+you multiple route choices for *short* trips (under 100 km). A real long haul comes
+back as just **one** route — and the whole point is to compare several.
+
+So we use a **"made-up" router by default** that produces three believable routes,
+and kept the real one as an easy swap for short trips.
 
 > [!TIP]
-> **💡 If they ask about backend performance:**
-> *"Naïvely you'd call the weather API once per checkpoint — ~120 calls, took 38
-> seconds and hit rate limits. I batch **every checkpoint across all routes into
-> one call**, so a plan is ~1 second."*
+> **💡 Say this:** *"The free tier of the real router won't give you 3 options on
+> long trips, and comparing routes is the whole point — so I generate 3 plausible
+> routes myself and kept the real router swappable. Hitting that limit and working
+> around it is the honest engineering."*
 
-#### ⚡ Risk rules
+### Step 2 — Drop "checkpoints" along each route
 
-Each checkpoint gets a level **0–4**, taking the **worst of wind / rain / snow**.
-Learn the shape, not the exact numbers:
+We can't check the weather at every inch of road, so we drop a **checkpoint** (just
+an imaginary mile-marker) every so often — **every 10, 25, or 50 miles** (you pick).
+Each checkpoint is a spot where we'll look up the weather.
 
-| Level | Wind | Rain | Snow |
+### Step 3 — Work out *when* the truck reaches each checkpoint
+
+This is the heart of the assignment, and it's just division.
+
+**ETA** = *Estimated Time of Arrival* = *when the truck gets to a spot.*
+
+```
+time to reach a checkpoint  =  miles driven so far  ÷  the route's speed
+clock time the truck is there  =  your departure time  +  that time
+```
+
+**Example** — a 60 mph route, leaving at **6:00 AM**:
+
+| Checkpoint | Miles in | Time to get there | Clock time |
 | --- | --- | --- | --- |
-| 🟢 Low | under ~25 mph | light | light |
-| 🟡 Moderate | 25–34 | … | … |
-| 🟠 High | 35–44 | … | … |
-| 🔴 Severe | 45–54 | … | … |
-| 🟣 No Travel | 55+ | heavy | heavy |
+| Start | 0 | 0 hrs | 6:00 AM |
+| Mile 300 | 300 | 300 ÷ 60 = 5 hrs | 11:00 AM |
+| Mile 600 | 600 | 600 ÷ 60 = 10 hrs | 4:00 PM |
 
-Then **load rules** bump wind up for heavy trucks (wind shoves a loaded trailer):
+So the truck hits mile 600 around **4 PM**. That's the time we'll check the weather
+for — see the next step.
 
-- strong wind (45–54) **+** over 30,000 lb → **No Travel**
-- medium wind (35–44) **+** over 40,000 lb → **Severe**
+### Step 4 — Check the weather *for that future time* (not "now")
 
-```mermaid
-flowchart TD
-    A[wind + rain + snow + load] --> B[each gets a level 0-4]
-    B --> C{heavy load<br/>and windy?}
-    C -->|"yes"| D[bump the wind level up]
-    C -->|"no"| E[leave it]
-    D --> F["final level = the worst of the three"]
-    E --> F
-```
+Here's what makes it a *routing* tool and not a weather app: for mile 600, we don't
+look up the weather *now* — we look up the forecast **for 4 PM, at that spot**,
+because that's when the truck is actually there.
 
 > [!TIP]
-> **💡 If they ask where this lives:** one function on the backend
-> (`scoring.classify`), reused by both the route checkpoints **and** the heatmap —
-> so they can't disagree. (That's a code-quality point too.)
+> **💡 Say this (this is the #1 thing they want to hear):**
+> *"For each checkpoint I take its ETA — miles divided by the route's speed — add it
+> to the departure time, and look up the forecast **for that exact hour at that
+> exact spot**. So I'm scoring the weather the truck will *actually* hit, not the
+> weather right now."*
 
-#### 🏆 Recommendation
+**A speed/performance detail worth dropping:** the simple way would be to call the
+weather service once per checkpoint — that's ~120 calls, it took **38 seconds** and
+kept getting blocked for being greedy. Instead we ask for **all the checkpoints at
+once in a single request**, which takes about **1 second**.
 
-Sort the routes by — in order — **fewest severe miles → fewest high miles → lowest
-average risk → shortest time.** First one wins. So a slightly slower route that
-dodges bad weather beats a fast risky one — which is the "balance risk and time"
-ask.
+> [!TIP]
+> **💡 Say this if they ask about performance on the backend:** *"I batch every
+> checkpoint into one weather request instead of ~120 separate ones — 38 seconds
+> down to about 1 second."*
+
+### Step 5 — Turn weather into a risk level
+
+Each checkpoint gets a danger level from **0 to 4**, by taking **whichever is worst**
+— wind, rain, or snow:
+
+| Level | Meaning | Rough trigger |
+| --- | --- | --- |
+| 🟢 0 | Low | calm |
+| 🟡 1 | Moderate | breezy / drizzle |
+| 🟠 2 | High | strong wind / steady rain |
+| 🔴 3 | Severe | very strong wind / heavy |
+| 🟣 4 | No Travel | dangerous |
+
+Then two **load rules** make it stricter for heavy trucks (a strong wind shoves a
+loaded trailer around):
+
+- strong wind **+** a very heavy load → bump up to **No Travel**
+- medium wind **+** a heavy load → bump up to **Severe**
+
+### Step 6 — Pick the best route
+
+We line the routes up and sort them by this priority (safety first, speed as the
+tie-breaker):
+
+1. Fewest **severe** miles
+2. Then fewest **high-risk** miles
+3. Then **lowest average** risk
+4. Then **fastest**
+
+The one at the top wins. So a route that's a little slower but avoids the bad
+weather beats a fast but dangerous one — which is exactly "balance risk and time."
 
 ```mermaid
 flowchart TD
-    S["sort routes by:"] --> A[1 . least severe miles]
-    A --> B[2 . least high miles]
-    B --> C[3 . lowest avg risk]
+    S["line up the routes, sort by:"] --> A[1 . least severe miles]
+    A --> B[2 . least high-risk miles]
+    B --> C[3 . lowest average risk]
     C --> D[4 . fastest]
-    D --> W(["🏆 winner = recommended"])
+    D --> W(["🏆 top of the list = recommended"])
 ```
 
 > [!TIP]
-> **💡 If they ask "how do you know *why* it picked that?"** We return which rule
-> broke the tie, and the UI shows a little **"Why this route?"** table. Explainable,
-> not magic.
+> **💡 Say this if they ask "how do you justify the pick?":** *"I show a little
+> table of which rule actually decided it, so the recommendation is explainable, not
+> a black box."*
 
 ---
 
-### ② Map & heatmap smoothness — the other 40%
+## The map and the smooth animation
 
-This is where you can shine, because there's a good *story*.
+### What's on the map
+The route drawn as a line **coloured by risk** (green→red as it gets dangerous),
+the checkpoint dots, a little **truck** marker, and the weather cloud underneath.
 
-#### 🗺️ On the map
+### Why "smoothness" was tricky (this is a great story)
 
-The chosen route is drawn as little **coloured segments** (each bit coloured by its
-risk), checkpoints are dots, there's a truck marker, and the heatmap sits
-underneath. The backend sends the raw road + checkpoints; the frontend figures out
-*where the colour changes* by slicing the line between checkpoints. *(Rendering
-detail, not something the API encodes — nice separation.)*
+There's a slider that plays the forecast forward over 48 hours — as it plays, the
+truck moves along the road and the weather cloud changes.
 
-#### 🌡️ The heatmap
+First version was **janky** (stuttery). Here's the plain-English why: the screen has
+to **redraw** to show movement. Redrawing is work. The map has a *lot* of stuff on it
+(the route, ~100 dots, cities…). If you redraw **the entire map 60 times a second**,
+that's like **repainting your whole house every time you nudge one picture frame** —
+way too much, so it stutters.
 
-Backend returns a grid of risk levels over the area for each hour; the frontend
-fades it to the route corridor, colours it, and blurs it onto the map.
+**The fix:** don't redraw the whole map constantly. Instead:
+- Let the **slider** update super smoothly (it's tiny, cheap to redraw).
+- Tell the **map** to only redraw about **twice a second** (your eye can't tell the
+  difference for a weather cloud that changes slowly).
+- Make the **truck glide** smoothly between those updates using a simple animation
+  trick (like a CSS transition — the browser slides it for us), so it *looks*
+  continuous even though the map itself isn't redrawing 60 times a second.
 
 > [!TIP]
-> **💡 If they ask "is the heatmap real?" → yes, but *coarse*,** and there's a nice
-> story: a fine grid (0.2°) is ~5,800 cells — thousands of API lookups per frame,
-> infeasible. The insight: **Open-Meteo returns a location's *entire* 48-hour
-> forecast in one call.** So I fetch a **coarse ~230-cell grid in a single batched
-> call** — the whole real field across space *and* all 48 hours — then upscale and
-> blur it. **Coarse-but-real beats fine-but-fake.**
->
-> And you *can't* build it from the checkpoints — they're a space-*time* diagonal
-> (position and clock advance together), so at any single hour you only have real
-> weather for ~one point.
-
-#### ✨ The smoothness story — learn this one
-
-The slider plays 0→48h, moving the truck and the heatmap. First version was janky.
-
-> [!CAUTION]
-> **The trap:** if "current hour" is a 60fps value and the *whole map* re-renders
-> on it, react-leaflet re-diffs ~150 layers **every frame** → thousands of
-> `setStyle` calls/sec → jank.
-
-**The fix — split the clock:**
-
-```mermaid
-flowchart TD
-    Play["▶️ play loop (60fps)"] --> H["fractional hour"]
-    H --> Slider["slider:<br/>smooth, cheap"]
-    H --> Rnd["round it"]
-    Rnd --> Map["🗺️ map: memoised<br/>~2x/sec"]
-    Map --> Truck["🚚 truck CSS-glides"]
-```
-
-- **Fractional hour** drives only the lightweight slider (smooth thumb).
-- The map gets the **rounded** hour and is `React.memo`'d → re-renders ~2×/sec, not
-  60. The side panel is memoised too.
-- The **truck CSS-glides** between integer steps, so it looks continuous without a
-  60fps re-render.
-- Heatmap frames are **precomputed + cached**, so scrubbing is instant.
+> **💡 Say this if they ask about map performance / smoothness:** *"Redrawing the
+> whole map every animation frame was too heavy and stuttered. So I let the
+> lightweight slider update smoothly, had the map update only ~twice a second, and
+> let the truck glide between those steps with a CSS animation. Looks smooth, but the
+> heavy part barely works."*
 
 > [!TIP]
-> **💡 Bonus bug story (if they ask about a tricky bug):** the truck used to
-> *blink* — disappear and reappear — on play. The markers had no React `key`, so
-> when the heat layer popped in/out, react-leaflet matched the map's children *by
-> position* and kept destroying + rebuilding the truck. A stable `key` fixed it.
-> → "I can debug React reconciliation."
+> **💡 Bonus bug story (if they ask about a hard bug):** *"The truck used to blink —
+> vanish and reappear — while playing. The map was accidentally throwing the truck
+> away and rebuilding it every frame instead of just moving it. Giving it a stable
+> ID fixed it."* (Shows you can debug tricky UI stuff.)
 
 ---
 
-### ③ Code quality — 15%
+## The weather heatmap
 
-- 🧩 The risk/routing/weather math is **plain functions, no framework** → unit
-  tested in isolation.
-- 🔌 **Provider pattern:** synthetic vs real (ORS / Open-Meteo) behind one
-  interface, picked by a setting. That's how I built it all **keyless** and flipped
-  to real later with one config line.
-- 🗄️ The backend is **stateless — no database, no models** — it just computes and
-  returns.
-- 🧪 **Tests are offline:** the real providers are tested with *mocked* HTTP, so the
-  suite is deterministic.
-- 🛟 **Graceful degradation:** if weather is down, the plan **doesn't crash** —
-  checkpoints show "no data" (grey + a banner) and routes/ETAs still return.
+The **heatmap** is the coloured **cloud** behind the route — it shows where the bad
+weather is across the whole region, and it animates over 48 hours.
 
-### ④ Docs — 5%
+To colour a whole region, you chop it into a **grid** — a checkerboard of little
+squares — and colour each square by its weather risk.
 
-This file + [`API.md`](API.md) (the full request/response contract). Done. ✅
+> [!TIP]
+> **💡 Say this if they ask "is the heatmap real weather?" → "Yes, but low-detail."**
+> *"A fine grid is ~5,800 squares — getting real weather for each one, for every
+> hour, would be thousands of lookups, which no weather service allows. The trick: one
+> request to Open-Meteo gives a spot's **entire 48-hour** forecast. So I ask for a
+> **coarse** grid (~230 squares) in **one** request — that's real weather across the
+> whole area and all 48 hours — then blur it so it looks smooth. Low-res but real."*
 
----
-
-## ❓ The "why did you…?" cheat sheet
-
-Always mention the trade-off — it sounds mature.
-
-| If they ask… | You say… |
-| --- | --- |
-| Why backend-heavy? | One source of truth; map + ranking can't disagree; easy to test. *Trade-off: frontend needs the API up.* |
-| Why synthetic routing? | ORS free tier caps alternatives at 100 km → long trips = 1 route; I need 3 to compare. Real roads come back via self-host / short trips. |
-| Is the heatmap real? | **Yes, but coarse** — fine grid = ~5,800 cells (infeasible); I fetch a coarse ~230-cell grid in one call (Open-Meteo gives each cell's full 48h) and blur it. |
-| Why one big weather call? | 120 calls → 1; 38s → ~1s; dodges rate limits. |
-| Why sample at the ETA? | It's a *routing* tool — you want the weather *when the truck is there*. |
-| How's the slider smooth? | Fractional hour drives only the slider; map gets a rounded hour + is memoised; truck CSS-glides. |
-| Everything UTC? | UTC on the wire, converted to your local time in the UI — no ambiguity. |
+Why can't we just reuse the checkpoint weather we already have? Because the
+checkpoints follow the truck — as the truck drives, *both* its place *and* the time
+move together. So at any single hour, we only have real weather for basically *one*
+spot (wherever the truck is then) — not enough to paint a whole map. That's why the
+heatmap needs its own grid of weather.
 
 ---
 
-## ⚠️ Don't get caught off guard
+## The honest bits (don't get caught off guard)
 
 > [!WARNING]
-> These are the "honest bits." Say them **confidently, not apologetically** — they're
-> deliberate calls, not misses.
+> Say these **calmly and confidently** — they're on-purpose choices, not mistakes.
 
-- **Routing is synthetic by default.** *"Correct, these aren't real roads — the free
-  routing tier won't give 3 alternatives on long trips. The real integration is
-  there and swappable."*
-- **The heatmap is real but coarse.** *"Real Open-Meteo data on a coarse grid,
-  blurred; a fine real grid would be thousands of lookups per frame."*
-- **It needs the backend running.** Not a static demo — the frontend talks to Django
-  for everything. If the API's down you get a "can't reach the service" screen, on
-  purpose, with no fake fallback data.
+- **The routes aren't real roads by default** — because the free routing service
+  won't give 3 options on long trips, and comparing 3 is the point. The real one is
+  wired up and swappable.
+- **The heatmap is real but low-resolution** — a full-detail real one would be
+  thousands of lookups per frame.
+- **It needs the backend running** — the screen asks the brain for everything. If
+  the brain is off, you get a clear "can't reach the service" message (no fake data,
+  on purpose).
 
 ---
 
-## ⏱️ 30-second version
+## Quick Q&A
+
+| They ask… | You answer… |
+| --- | --- |
+| Where does the truck's speed come from? | The routing service gives distance + time, so speed = distance ÷ time. The user never types it. |
+| How do you know when the truck reaches a point? | ETA = miles ÷ speed, added to the departure time. |
+| Why check weather at the ETA? | Because you care about the weather *when the truck is there*, not now. |
+| Why only one weather call? | 120 separate calls took 38s and got rate-limited; one batched call is ~1s. |
+| Why aren't the routes real? | Free routing tier won't give 3 options on long trips; I need 3 to compare. |
+| Is the heatmap real? | Yes, but a coarse grid (one request gives each square's full 48h), blurred to look smooth. |
+| How'd you make the slider smooth? | Update the slider smoothly, the heavy map only ~2×/sec, and glide the truck between steps. |
+
+---
+
+## 30-second version
 
 > [!NOTE]
-> Read this last, right before you go in.
+> Read this right before you walk in.
 
-> Truck router that scores weather along the route. The **backend** generates
-> routes, chops them into checkpoints, and checks the weather **at the truck's ETA**
-> at each point — worst of wind/rain/snow, bumped up for heavy loads — then ranks
-> routes by severe miles, then high miles, then average risk, then time, and returns
-> clean JSON. The **React/Leaflet frontend** draws the routes coloured by risk, the
-> checkpoints, a moving truck, and a 0–48h weather heatmap you can scrub. Two things
-> I'm proud of: **batching ~120 weather lookups into one call** so a plan takes ~1
-> second, and keeping the animation smooth by running the **slider at 60fps but the
-> memoised map at ~2fps** with a CSS-glided truck. Real-vs-synthetic sits behind a
-> **provider switch**, so it was built keyless and flipped to real (OpenRouteService
-> + Open-Meteo) with a config change.
+> It's a truck router that scores the weather along the way. The backend makes a few
+> routes, drops checkpoints every so many miles, and for each one works out **when**
+> the truck gets there (miles ÷ speed + departure time) and looks up the forecast
+> **for that time** — then scores danger from wind/rain/snow (worse for heavy loads)
+> and recommends the safest route that isn't much slower. The screen shows the routes
+> coloured by risk, a moving truck, and a 48-hour weather cloud you can scrub. Two
+> things I'm proud of: getting all the weather in **one request** so a plan takes ~1
+> second instead of 38, and keeping the animation smooth by updating the **slider**
+> fast but the **map** slowly and letting the truck **glide**. Real vs made-up data
+> is behind a switch, so I built it with no API keys and flipped to real later.
 
 <div align="center">
 
-**You got this. 🚚💨**
+**You've got this. 🚚💨**
 
 </div>
