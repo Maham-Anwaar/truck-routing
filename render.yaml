@@ -1,0 +1,51 @@
+# Render Blueprint — deploys BOTH services from this repo.
+# In Render: New → Blueprint → pick this repo. It reads this file.
+# Two values can only be filled in AFTER the first deploy (each service needs the
+# other's URL); Render prompts for them because they're marked `sync: false`.
+# See docs/DEPLOY.md for the click-by-click.
+
+services:
+  # --- Backend: Django REST API (gunicorn) ---
+  - type: web
+    name: truck-routing-api
+    runtime: python
+    rootDir: apps/api
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    # Render provides $PORT; gunicorn must bind to it.
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true          # Render generates a strong secret
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".onrender.com"        # matches this service's own domain
+      - key: WEATHER_PROVIDER
+        value: open_meteo             # real, keyless
+      - key: ROUTING_PROVIDER
+        value: synthetic              # keyless; set to `ors` + ORS_API_KEY to swap
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false                   # ← paste the FRONTEND url after first deploy
+                                      #    e.g. https://truck-routing-web.onrender.com
+
+  # --- Frontend: Vite static build ---
+  - type: web
+    name: truck-routing-web
+    runtime: static
+    rootDir: apps/web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    # SPA fallback: every path serves index.html so client routing works.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false                   # ← paste the BACKEND url + /api after first deploy
+                                      #    e.g. https://truck-routing-api.onrender.com/api
