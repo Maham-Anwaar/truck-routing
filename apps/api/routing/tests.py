@@ -117,6 +117,17 @@ class PlanEndpointTests(SimpleTestCase):
         status, _ = _post(views.PlanView.as_view(), "/api/routes/plan", bad)
         self.assertEqual(status, 400)
 
+    @patch("routing.services.planner.get_weather_provider")
+    def test_weather_failure_degrades_to_no_data(self, mock_get):
+        provider = MagicMock()
+        provider.forecast_many.side_effect = Exception("provider down")
+        mock_get.return_value = provider
+        status, body = _post(views.PlanView.as_view(), "/api/routes/plan", DM_TRIP)
+        self.assertEqual(status, 200)  # not a 500
+        cps = body["routes"][0]["checkpoints"]
+        self.assertTrue(any(c["status"] == "no_data" for c in cps))
+        self.assertTrue(all(c["weather"] is None for c in cps if c["status"] == "no_data"))
+
 
 class WeatherFieldTests(SimpleTestCase):
     FIELD_REQ = {

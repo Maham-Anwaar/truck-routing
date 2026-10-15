@@ -5,10 +5,13 @@ samples checkpoints, scores each against the weather provider at its ETA,
 summarises and ranks, and shapes the /routes/plan response (docs/API.md).
 """
 
+import logging
 import math
 from datetime import timedelta, timezone
 
 from .. import scoring
+
+logger = logging.getLogger(__name__)
 from .geo import haversine_mi, jround, now_utc
 from .route_source import get_routing_provider
 from .weather import get_weather_provider
@@ -194,9 +197,18 @@ def plan(origin, dest, departure_utc, load_lb, spacing_mi):
     sampled = [_sample_route(rd, spacing_mi, horizon, departure_utc) for rd in routing.routes(origin, dest)]
     scored = [r for sk in sampled for r in sk["raw"] if r["status"] == "ok"]
     points = [(r["ll"][0], r["ll"][1], r["eta"], departure_utc + timedelta(hours=r["eta"])) for r in scored]
-    for r, w in zip(scored, weather.forecast_many(points)):
-        r["weather"] = w
-        r["risk"] = scoring.classify(w["wind_gust_mph"], w["rain_in_hr"], w["snow_in_hr"], load_lb)
+    try:
+        forecasts = weather.forecast_many(points)
+    except Exception:
+        # Weather provider unavailable — degrade to "no data" instead of 500ing
+        # (routes/ETAs still return; the UI shows gray checkpoints + a banner).
+        logger.exception("weather provider failed; marking checkpoints no_data")
+        for r in scored:
+            r["status"] = "no_data"
+    else:
+        for r, w in zip(scored, forecasts):
+            r["weather"] = w
+            r["risk"] = scoring.classify(w["wind_gust_mph"], w["rain_in_hr"], w["snow_in_hr"], load_lb)
 
     routes = [_finalize_route(sk) for sk in sampled]
     ranking = _rank(routes)
