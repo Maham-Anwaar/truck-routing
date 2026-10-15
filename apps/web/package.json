@@ -20,7 +20,6 @@
     "react-leaflet": "^5.0.0"
   },
   "devDependencies": {
-    "@oxlint/binding-darwin-arm64": "^1.88.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
@@ -29,6 +28,7 @@
     "vitest": "^4.1.11"
   },
   "optionalDependencies": {
+    "@oxlint/binding-darwin-arm64": "^1.88.0",
     "@rolldown/binding-darwin-arm64": "1.2.14"
   }
 }
