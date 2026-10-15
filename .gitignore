@@ -34,3 +34,7 @@ db.sqlite3
 .env
 *.env.local
 .vite/
+
+# Personal interview prep (kept local, not shipped)
+docs/WALKTHROUGH.md
+docs/LOOM_SCRIPT.md

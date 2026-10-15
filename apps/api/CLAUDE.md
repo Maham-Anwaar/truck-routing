@@ -2,7 +2,7 @@
 
 Stateless JSON API that powers the frontend. **No models, no database, no auth** —
 it calls providers, computes, and returns. See `docs/API.md` for the wire
-contract and `docs/WALKTHROUGH.md` for the why.
+contract.
 
 ## Run / test
 

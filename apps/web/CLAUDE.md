@@ -3,7 +3,7 @@
 The UI. It **consumes the API for everything** (places, routes, weather, heatmap)
 and only does visual derivation. **Hard rule: no synthetic/dummy data in the
 frontend** — if the API is down, show an error state, never fake data. See
-`docs/WALKTHROUGH.md` for the why and `docs/API.md` for the contract.
+`docs/API.md` for the contract.
 
 ## Run / test — ALWAYS set the npm cache first
 
