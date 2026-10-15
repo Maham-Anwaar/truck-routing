@@ -69,7 +69,7 @@ REST_FRAMEWORK = {
     "UNAUTHENTICATED_USER": None,
 }
 
-# Provider config (read by the services).
+# Provider config (read by the services). Defaults are keyless/synthetic.
 ORS_API_KEY = os.environ.get("ORS_API_KEY", "")
-# "synthetic" until a real provider is wired; swap to "ors" once ORS_API_KEY is set.
-ROUTING_PROVIDER = os.environ.get("ROUTING_PROVIDER", "synthetic")
+ROUTING_PROVIDER = os.environ.get("ROUTING_PROVIDER", "synthetic")  # "synthetic" | "ors"
+WEATHER_PROVIDER = os.environ.get("WEATHER_PROVIDER", "synthetic")  # "synthetic" | "open_meteo"

@@ -10,9 +10,13 @@ responsibility — is specified in [`../../docs/API.md`](../../docs/API.md).
 
 | Capability | Source | Key? |
 | --- | --- | --- |
-| Routing (`/routes/plan` geometry + A/B/C) | **OpenRouteService free tier** (`driving-hgv`) | `ORS_API_KEY` |
-| Weather (`/routes/plan`, `/weather/field`) | **TBD** — NOAA/NWS recommended (free, keyless) | — |
-| Places (`/places`) | **`data/places.json`** (50 state capitals + DC) | none |
+| Routing (`/routes/plan` geometry + A/B/C) | synthetic (default) or **OpenRouteService** (`driving-hgv`) | `ORS_API_KEY` for ors |
+| Weather (`/routes/plan` checkpoints) | synthetic (default) or **Open-Meteo** (real, keyless) | none |
+| Weather (`/weather/field` heatmap grid) | always **synthetic** (a per-cell real grid isn't feasible) | none |
+| Places (`/places`) | **`data/places.json`** (50 state capitals + demo cities) | none |
+
+Flip providers in `.env`: `ROUTING_PROVIDER=ors` (+ `ORS_API_KEY`) and/or
+`WEATHER_PROVIDER=open_meteo`. Both default to keyless synthetic data.
 
 Risk scoring + ranking are computed by the backend (port the reference logic
 from `apps/web/src/domain/`: `weather.js`, `routes.js`). ORS only supplies the

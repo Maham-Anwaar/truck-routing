@@ -57,37 +57,44 @@ def _build_route(rd, spacing, load, weather, horizon, departure):
         m += spacing
     ms.append(total)
 
-    cps, internal = [], []
+    # Pass 1: checkpoint positions, ETAs, and status.
+    raw = []
     for i, m in enumerate(ms):
-        ll = at(m)
         eta = m / speed
-        if eta > horizon:
-            status, weather_out = "beyond_forecast", None
-            r = {"level_index": -1, "level": None, "driver": None, "escalation_rule": None}
+        raw.append({"i": i, "m": m, "ll": at(m), "eta": eta, "status": "ok" if eta <= horizon else "beyond_forecast"})
+
+    # Batch the weather for all scored checkpoints on this route in one call.
+    scored = [r for r in raw if r["status"] == "ok"]
+    points = [(r["ll"][0], r["ll"][1], r["eta"], departure + timedelta(hours=r["eta"])) for r in scored]
+    for r, w in zip(scored, weather.forecast_many(points)):
+        r["weather"] = w
+        r["risk"] = scoring.classify(w["wind_gust_mph"], w["rain_in_hr"], w["snow_in_hr"], load)
+
+    # Pass 2: build checkpoint records.
+    cps, internal = [], []
+    for r in raw:
+        if r["status"] == "ok":
+            w = r["weather"]
+            weather_out = {"wind_gust_mph": w["wind_gust_mph"], "rain_in_hr": w["rain_in_hr"], "snow_in_hr": w["snow_in_hr"]}
+            risk = r["risk"]
         else:
-            status = "ok"
-            w = weather.forecast(ll[0], ll[1], eta)
-            weather_out = {
-                "wind_gust_mph": w["wind_gust_mph"],
-                "rain_in_hr": w["rain_in_hr"],
-                "snow_in_hr": w["snow_in_hr"],
-            }
-            r = scoring.classify(w["wind_gust_mph"], w["rain_in_hr"], w["snow_in_hr"], load)
+            weather_out = None
+            risk = {"level_index": -1, "level": None, "driver": None, "escalation_rule": None}
         cps.append({
-            "index": i,
-            "mile_marker": jround(m),
-            "coord": {"lat": round(ll[0], 4), "lon": round(ll[1], 4)},
-            "eta_utc": _iso(departure + timedelta(hours=eta)),
-            "status": status,
+            "index": r["i"],
+            "mile_marker": jround(r["m"]),
+            "coord": {"lat": round(r["ll"][0], 4), "lon": round(r["ll"][1], 4)},
+            "eta_utc": _iso(departure + timedelta(hours=r["eta"])),
+            "status": r["status"],
             "weather": weather_out,
             "risk": {
-                "level": r["level"],
-                "level_index": r["level_index"] if r["level_index"] >= 0 else None,
-                "driver": r["driver"],
-                "escalation_rule": r["escalation_rule"],
+                "level": risk["level"],
+                "level_index": risk["level_index"] if risk["level_index"] >= 0 else None,
+                "driver": risk["driver"],
+                "escalation_rule": risk["escalation_rule"],
             },
         })
-        internal.append({"lv": r["level_index"], "m": m})
+        internal.append({"lv": risk["level_index"], "m": r["m"]})
 
     # Segment mileage by risk level (max of the two bounding checkpoints).
     level_mi, gray_mi = [0.0] * 5, 0.0

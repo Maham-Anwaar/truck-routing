@@ -164,3 +164,31 @@ class OrsProviderTests(SimpleTestCase):
         mock_post.return_value = MagicMock(status_code=200, json=lambda: {"features": []})
         with self.assertRaises(NoRouteError):
             OrsRoutingProvider("fake-key").routes({"lat": 1, "lon": 1}, {"lat": 2, "lon": 2})
+
+
+class OpenMeteoProviderTests(SimpleTestCase):
+    @patch("routing.services.weather.requests.get")
+    def test_batches_and_maps(self, mock_get):
+        from datetime import datetime, timezone
+
+        from .services.weather import OpenMeteoWeatherProvider
+
+        # Two locations -> Open-Meteo returns a list, each with its own hourly series.
+        mock_get.return_value = MagicMock(
+            status_code=200,
+            json=lambda: [
+                {"hourly": {"time": ["2026-10-15T06:00", "2026-10-15T07:00"], "wind_gusts_10m": [40, 10], "rain": [0.2, 0.0], "snowfall": [0.0, 0.0]}},
+                {"hourly": {"time": ["2026-10-15T06:00", "2026-10-15T07:00"], "wind_gusts_10m": [12, 12], "rain": [0.0, 0.0], "snowfall": [0.3, 0.0]}},
+            ],
+        )
+        vt = datetime(2026, 10, 15, 6, 0, tzinfo=timezone.utc)
+        out = OpenMeteoWeatherProvider().forecast_many([(39.0, -94.0, 0.0, vt), (44.0, -93.0, 1.0, vt)])
+        self.assertEqual(out[0], {"wind_gust_mph": 40, "rain_in_hr": 0.2, "snow_in_hr": 0.0})
+        self.assertEqual(out[1], {"wind_gust_mph": 12, "rain_in_hr": 0.0, "snow_in_hr": 0.3})
+        # one batched request, not one per point
+        self.assertEqual(mock_get.call_count, 1)
+
+    def test_empty_points(self):
+        from .services.weather import OpenMeteoWeatherProvider
+
+        self.assertEqual(OpenMeteoWeatherProvider().forecast_many([]), [])

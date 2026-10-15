@@ -11,11 +11,13 @@ from datetime import timedelta
 
 from .. import scoring
 from .geo import DEMO_NOW, iso_utc
-from .weather import get_weather_provider
+from .weather import SyntheticWeatherProvider
 
 
 def build_field(bbox, departure, from_hour, to_hour, resolution, load):
-    weather = get_weather_provider()
+    # The heatmap grid stays synthetic — a real per-cell forecast (thousands of
+    # points) isn't feasible via a point API. Checkpoints can still be real.
+    weather = SyntheticWeatherProvider()
     south, west = bbox["south"], bbox["west"]
     north, east = bbox["north"], bbox["east"]
     st = resolution
