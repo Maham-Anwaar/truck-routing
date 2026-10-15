@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Info } from "@phosphor-icons/react";
+import { Info, CaretDown, CaretRight } from "@phosphor-icons/react";
 import { LV, GRAY } from "../../domain/levels.js";
 import InfoPopover from "./InfoPopover.jsx";
 import styles from "./Legend.module.css";
@@ -11,24 +11,30 @@ const ROWS = [
 
 export default function Legend() {
   const [infoOpen, setInfoOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   return (
     <div className={styles.legend}>
       <div className={styles.titleRow}>
-        <div className={styles.title}>Risk level</div>
+        <button className={styles.toggle} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+          {open ? <CaretDown size={12} /> : <CaretRight size={12} />}
+          <span className={styles.title}>Risk level</span>
+        </button>
         <button className={styles.info} onClick={() => setInfoOpen(true)} aria-label="How risk is scored">
           <Info size={14} />
         </button>
       </div>
-      <div className={styles.rows}>
-        {ROWS.map((r) => (
-          <div key={r.n} className={styles.row}>
-            <span className={styles.swatch} style={{ background: r.bg, color: r.fg }}>
-              {r.g}
-            </span>
-            <span className={styles.name}>{r.n}</span>
-          </div>
-        ))}
-      </div>
+      {open && (
+        <div className={styles.rows}>
+          {ROWS.map((r) => (
+            <div key={r.n} className={styles.row}>
+              <span className={styles.swatch} style={{ background: r.bg, color: r.fg }}>
+                {r.g}
+              </span>
+              <span className={styles.name}>{r.n}</span>
+            </div>
+          ))}
+        </div>
+      )}
       {infoOpen && <InfoPopover onClose={() => setInfoOpen(false)} />}
     </div>
   );
