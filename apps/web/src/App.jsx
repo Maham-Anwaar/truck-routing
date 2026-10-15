@@ -74,7 +74,7 @@ export default function App() {
       <MapView
         data={data}
         selected={selected}
-        hour={hour}
+        hour={Math.round(hour)}
         heatOn={heatOn}
         allCps={allCps}
         hoverRoute={hoverRoute}

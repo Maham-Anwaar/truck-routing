@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -122,7 +122,9 @@ function CityMarkers() {
   ));
 }
 
-export default function MapView({
+// Memoised: during play, App passes a rounded (integer) `hour`, so this only
+// re-renders ~twice a second while the slider updates smoothly at 60fps.
+function MapView({
   data,
   selected,
   hour,
@@ -320,3 +322,5 @@ export default function MapView({
     </MapContainer>
   );
 }
+
+export default memo(MapView);

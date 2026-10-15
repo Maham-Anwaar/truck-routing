@@ -12,22 +12,30 @@ export default function ForecastSlider({ data, selected, hour, setHour, playing,
   const arrivalLabel = sel ? `Route ${sel.id} arrives ${clock(dep + sel.hours * 3.6e6)}` : "";
   // Play stops when the truck reaches the destination (first whole hour at/after arrival).
   const stopHour = sel ? Math.min(48, Math.ceil(sel.hours)) : 48;
-  const timer = useRef();
+  const raf = useRef();
 
-  // Play loop: advance one forecast hour every 500ms, stopping when the truck
-  // reaches its destination (the selected route's arrival hour).
+  // Play loop: advance the forecast continuously (rAF) for a smooth slider +
+  // truck, stopping when the truck reaches its destination. ~2 forecast hours
+  // per real second.
   useEffect(() => {
     if (!playing) return;
-    timer.current = setInterval(() => {
+    const RATE = 2; // forecast hours per real second
+    let last = performance.now();
+    const tick = (now) => {
+      const dt = (now - last) / 1000;
+      last = now;
       setHour((h) => {
-        if (h >= stopHour) {
+        const next = h + dt * RATE;
+        if (next >= stopHour) {
           setPlaying(false);
-          return h;
+          return stopHour;
         }
-        return h + 1;
+        return next;
       });
-    }, 500);
-    return () => clearInterval(timer.current);
+      raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
   }, [playing, stopHour, setHour, setPlaying]);
 
   const togglePlay = () => {
@@ -137,7 +145,7 @@ export default function ForecastSlider({ data, selected, hour, setHour, playing,
       <div className={styles.readout}>
         <strong>{data ? `${clock(dep + hour * 3.6e6)} ${TZ}` : "—"}</strong>
         <span className={beyond ? styles.beyond : ""}>
-          +{hour} h{beyond ? " · Beyond forecast" : ""}
+          +{Math.round(hour)} h{beyond ? " · Beyond forecast" : ""}
         </span>
       </div>
     </div>
