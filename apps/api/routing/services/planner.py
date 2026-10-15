@@ -35,7 +35,8 @@ def _dur(h):
     return f"{M} min"
 
 
-def _build_route(rd, spacing, load, weather, horizon, departure):
+def _sample_route(rd, spacing, horizon, departure):
+    """Positions, ETAs, and status for each checkpoint — no weather yet."""
     pts = rd["geometry"]
     cum = [0.0]
     for i in range(1, len(pts)):
@@ -57,20 +58,18 @@ def _build_route(rd, spacing, load, weather, horizon, departure):
         m += spacing
     ms.append(total)
 
-    # Pass 1: checkpoint positions, ETAs, and status.
     raw = []
     for i, m in enumerate(ms):
         eta = m / speed
         raw.append({"i": i, "m": m, "ll": at(m), "eta": eta, "status": "ok" if eta <= horizon else "beyond_forecast"})
+    return {"rd": rd, "pts": pts, "total": total, "speed": speed, "raw": raw, "departure": departure}
 
-    # Batch the weather for all scored checkpoints on this route in one call.
-    scored = [r for r in raw if r["status"] == "ok"]
-    points = [(r["ll"][0], r["ll"][1], r["eta"], departure + timedelta(hours=r["eta"])) for r in scored]
-    for r, w in zip(scored, weather.forecast_many(points)):
-        r["weather"] = w
-        r["risk"] = scoring.classify(w["wind_gust_mph"], w["rain_in_hr"], w["snow_in_hr"], load)
 
-    # Pass 2: build checkpoint records.
+def _finalize_route(sk):
+    """Build checkpoint records + summary once weather/risk are on the raw cps."""
+    rd, pts, total, speed, raw, departure = (
+        sk["rd"], sk["pts"], sk["total"], sk["speed"], sk["raw"], sk["departure"]
+    )
     cps, internal = [], []
     for r in raw:
         if r["status"] == "ok":
@@ -191,10 +190,15 @@ def plan(origin, dest, departure_utc, load_lb, spacing_mi):
     routing = get_routing_provider()
     horizon = 48 - (departure_utc - DEMO_NOW).total_seconds() / 3600
 
-    routes = [
-        _build_route(rd, spacing_mi, load_lb, weather, horizon, departure_utc)
-        for rd in routing.routes(origin, dest)
-    ]
+    # Sample every route, then fetch weather for ALL checkpoints in ONE call.
+    sampled = [_sample_route(rd, spacing_mi, horizon, departure_utc) for rd in routing.routes(origin, dest)]
+    scored = [r for sk in sampled for r in sk["raw"] if r["status"] == "ok"]
+    points = [(r["ll"][0], r["ll"][1], r["eta"], departure_utc + timedelta(hours=r["eta"])) for r in scored]
+    for r, w in zip(scored, weather.forecast_many(points)):
+        r["weather"] = w
+        r["risk"] = scoring.classify(w["wind_gust_mph"], w["rain_in_hr"], w["snow_in_hr"], load_lb)
+
+    routes = [_finalize_route(sk) for sk in sampled]
     ranking = _rank(routes)
     for rt in routes:
         rt.pop("_rank", None)

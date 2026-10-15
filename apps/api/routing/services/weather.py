@@ -70,7 +70,7 @@ class OpenMeteoWeatherProvider:
             "timezone": "UTC",
             "forecast_days": 3,  # covers departure + 48 h horizon
         }
-        resp = requests.get(self.URL, params=params, timeout=20)
+        resp = requests.get(self.URL, params=params, timeout=30)
         resp.raise_for_status()
         data = resp.json()
         # One location -> dict; several -> list (comma-separated coords).
