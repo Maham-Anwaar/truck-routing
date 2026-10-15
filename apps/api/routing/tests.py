@@ -1,7 +1,7 @@
 import json
 from unittest.mock import MagicMock, patch
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 from rest_framework.test import APIRequestFactory
 
 from . import scoring, views
@@ -83,6 +83,9 @@ def _post(view, path, body):
     return response.status_code, json.loads(response.content)
 
 
+# Pin synthetic providers so plan tests stay deterministic and offline
+# (the app now defaults to the real Open-Meteo weather provider).
+@override_settings(WEATHER_PROVIDER="synthetic", ROUTING_PROVIDER="synthetic")
 class PlanEndpointTests(SimpleTestCase):
     def test_dallas_to_minneapolis_parity(self):
         status, body = _post(views.PlanView.as_view(), "/api/routes/plan", DM_TRIP)

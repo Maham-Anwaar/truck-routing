@@ -71,5 +71,7 @@ REST_FRAMEWORK = {
 
 # Provider config (read by the services). Defaults are keyless/synthetic.
 ORS_API_KEY = os.environ.get("ORS_API_KEY", "")
-ROUTING_PROVIDER = os.environ.get("ROUTING_PROVIDER", "synthetic")  # "synthetic" | "ors"
-WEATHER_PROVIDER = os.environ.get("WEATHER_PROVIDER", "synthetic")  # "synthetic" | "open_meteo"
+# Routing needs a key for the real provider, so it defaults to synthetic until
+# ORS_API_KEY is set; weather uses the real (keyless) Open-Meteo provider.
+ROUTING_PROVIDER = os.environ.get("ROUTING_PROVIDER", "ors" if ORS_API_KEY else "synthetic")
+WEATHER_PROVIDER = os.environ.get("WEATHER_PROVIDER", "open_meteo")  # "open_meteo" | "synthetic"
