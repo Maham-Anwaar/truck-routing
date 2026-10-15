@@ -60,6 +60,9 @@ export default function App() {
     [setForm],
   );
 
+  // Stable so the memoised SidePanel isn't re-rendered each frame during play.
+  const collapsePanel = useCallback(() => setCollapsed(true), []);
+
   const panelProps = {
     data, form, setField, setForm, phase, loadStep, submit,
     editing, setEditing, selected, view, setView, whyOpen, setWhyOpen, pin, spacing,
@@ -177,7 +180,7 @@ export default function App() {
           <SidePanel
             {...panelProps}
             layout={layout}
-            onCollapse={layout === "tablet" ? () => setCollapsed(true) : undefined}
+            onCollapse={layout === "tablet" ? collapsePanel : undefined}
           />
           {stage}
         </>

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { RoadHorizon, CaretLeft } from "@phosphor-icons/react";
 import TripForm from "./TripForm.jsx";
 import TripSummary from "./TripSummary.jsx";
@@ -9,7 +9,9 @@ import CheckpointTable from "./CheckpointTable.jsx";
 import Legend from "./Legend.jsx";
 import styles from "./SidePanel.module.css";
 
-export default function SidePanel({
+// Memoised so it doesn't re-render at 60fps while the forecast plays
+// (its props are stable during play — only the slider's hour changes).
+function SidePanel({
   data,
   form,
   setField,
@@ -180,3 +182,5 @@ export default function SidePanel({
     </aside>
   );
 }
+
+export default memo(SidePanel);
