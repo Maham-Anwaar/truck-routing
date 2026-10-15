@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { ArrowsDownUp, Scales, WarningCircle, CircleNotch, CaretDown } from "@phosphor-icons/react";
 import { findPlace, fmtLoad, toLocalStr } from "../../domain/format.js";
 import { getPlaces } from "../../domain/geo.js";
+import { DEFAULT_TRIP } from "../../state/usePlanner.js";
 import {
   isValidTrip,
   fieldError,
@@ -33,7 +34,7 @@ export default function TripForm({ form, setField, setForm, phase, loadStep, onS
   };
   const swap = () => setForm((f) => ({ ...f, origin: f.dest, dest: f.origin }));
   const fillExample = () => {
-    setForm({ origin: "Dallas, TX", dest: "Minneapolis, MN", dep: "2026-10-15T06:00", load: "42,000" });
+    setForm(DEFAULT_TRIP);
     setTouched({});
   };
 

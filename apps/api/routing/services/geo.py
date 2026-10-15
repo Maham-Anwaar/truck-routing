@@ -14,10 +14,10 @@ def iso_utc(dt):
 # of longitude like a degree of latitude in the synthetic field + distances.
 COS = math.cos(math.radians(38.9))
 
-# Synthetic reference "now" — matches the frontend demo so sample trips are
-# deterministic and the default departure stays valid. Real weather later uses
-# the actual current time instead.
-DEMO_NOW = datetime(2026, 10, 14, 14, 47, tzinfo=timezone.utc)
+def now_utc():
+    """The current instant (UTC). The forecast horizon and the valid departure
+    window are measured from this."""
+    return datetime.now(timezone.utc)
 
 # Known endpoints of the hand-authored demo corridor (coords, not labels).
 DALLAS = (32.78, -96.80)

@@ -10,7 +10,7 @@ import math
 from datetime import timedelta
 
 from .. import scoring
-from .geo import DEMO_NOW, iso_utc
+from .geo import iso_utc, now_utc
 from .weather import SyntheticWeatherProvider
 
 
@@ -25,7 +25,7 @@ def build_field(bbox, departure, from_hour, to_hour, resolution, load):
     rows = max(1, round((north - south) / st))
 
     # Only return frames within the 48 h forecast horizon.
-    horizon = 48 - (departure - DEMO_NOW).total_seconds() / 3600
+    horizon = 48 - (departure - now_utc()).total_seconds() / 3600
     last = min(to_hour, math.floor(horizon))
 
     frames = []

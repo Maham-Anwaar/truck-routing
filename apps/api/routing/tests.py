@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 from django.test import SimpleTestCase, override_settings
@@ -8,6 +9,11 @@ from . import scoring, views
 from .services.route_source import NoRouteError, OrsRoutingProvider
 
 _factory = APIRequestFactory()
+
+
+def _dep(hours_from_now):
+    """ISO-UTC departure relative to now (the valid window moves with real time)."""
+    return (datetime.now(timezone.utc) + timedelta(hours=hours_from_now)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _get(view, path, params=None):
@@ -71,7 +77,7 @@ class HealthEndpointTests(SimpleTestCase):
 DM_TRIP = {
     "origin": {"lat": 32.78, "lon": -96.80},
     "destination": {"lat": 44.98, "lon": -93.27},
-    "departureUtc": "2026-10-15T06:00:00Z",
+    "departureUtc": _dep(3),
     "loadLb": 42000,
     "checkpointSpacingMi": 25,
 }
@@ -102,7 +108,7 @@ class PlanEndpointTests(SimpleTestCase):
         self.assertIn("windGustMph", a["checkpoints"][0]["weather"])
 
     def test_rejects_out_of_range_departure(self):
-        bad = {**DM_TRIP, "departureUtc": "2026-10-20T06:00:00Z"}
+        bad = {**DM_TRIP, "departureUtc": _dep(72)}  # beyond the 48 h window
         status, _ = _post(views.PlanView.as_view(), "/api/routes/plan", bad)
         self.assertEqual(status, 400)
 
@@ -115,7 +121,7 @@ class PlanEndpointTests(SimpleTestCase):
 class WeatherFieldTests(SimpleTestCase):
     FIELD_REQ = {
         "bbox": {"south": 38.0, "west": -98.0, "north": 42.0, "east": -94.0},
-        "departureUtc": "2026-10-15T06:00:00Z",
+        "departureUtc": _dep(3),
         "fromHour": 0,
         "toHour": 3,
         "resolutionDeg": 0.5,
@@ -135,8 +141,8 @@ class WeatherFieldTests(SimpleTestCase):
         self.assertTrue(frame["validUtc"].endswith("Z"))
 
     def test_trims_frames_beyond_horizon(self):
-        # Departure late enough that only a few hours fit in the 48 h window.
-        req = {**self.FIELD_REQ, "departureUtc": "2026-10-16T10:00:00Z", "toHour": 48}
+        # Departure ~46 h out so only ~2 h of the trip fit in the 48 h window.
+        req = {**self.FIELD_REQ, "departureUtc": _dep(46), "toHour": 48}
         _, body = _post(views.WeatherFieldView.as_view(), "/api/weather/field", req)
         self.assertLess(len(body["frames"]), 10)
 

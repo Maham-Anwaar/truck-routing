@@ -1,5 +1,6 @@
-// "Now" is pinned to a fixed instant so the demo forecast is deterministic.
-export const NOW = Date.UTC(2026, 9, 14, 14, 47);
+// Current instant (epoch ms) — the valid departure window and the timezone
+// label are measured from this. Captured at app load.
+export const NOW = Date.now();
 
 export const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export const MONS = [

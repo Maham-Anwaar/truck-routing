@@ -9,7 +9,7 @@ import math
 from datetime import timedelta, timezone
 
 from .. import scoring
-from .geo import DEMO_NOW, haversine_mi, jround
+from .geo import haversine_mi, jround, now_utc
 from .route_source import get_routing_provider
 from .weather import get_weather_provider
 
@@ -188,7 +188,7 @@ def plan(origin, dest, departure_utc, load_lb, spacing_mi):
     """origin/dest = {lat, lon}; departure_utc = aware datetime. -> response dict."""
     weather = get_weather_provider()
     routing = get_routing_provider()
-    horizon = 48 - (departure_utc - DEMO_NOW).total_seconds() / 3600
+    horizon = 48 - (departure_utc - now_utc()).total_seconds() / 3600
 
     # Sample every route, then fetch weather for ALL checkpoints in ONE call.
     sampled = [_sample_route(rd, spacing_mi, horizon, departure_utc) for rd in routing.routes(origin, dest)]

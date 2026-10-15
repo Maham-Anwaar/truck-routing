@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from rest_framework import serializers
 
-from .services.geo import DEMO_NOW
+from .services.geo import now_utc
 
 
 class CoordSerializer(serializers.Serializer):
@@ -18,9 +18,8 @@ class PlanRequestSerializer(serializers.Serializer):
     checkpoint_spacing_mi = serializers.ChoiceField(choices=[10, 25, 50], default=25)
 
     def validate_departure_utc(self, value):
-        lo = DEMO_NOW - timedelta(minutes=15)
-        hi = DEMO_NOW + timedelta(hours=48)
-        if not (lo <= value <= hi):
+        now = now_utc()
+        if not (now - timedelta(minutes=15) <= value <= now + timedelta(hours=48)):
             raise serializers.ValidationError("Departure must be within the next 48 hours.")
         return value
 

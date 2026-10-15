@@ -1,7 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { findPlace, suggest, dur, fmtLoad, loadNum } from "./format.js";
+import { findPlace, suggest, dur, fmtLoad, loadNum, toLocalStr } from "./format.js";
 import { isValidTrip, fieldError } from "./validation.js";
 import { setPlaces } from "./geo.js";
+
+// Departures are relative to now (the valid window moves with real time).
+const depFromNow = (h) => toLocalStr(Date.now() + h * 3.6e6);
 
 // Routing/ranking + risk scoring now live in the backend (apps/api), tested there.
 // Places normally come from the API at runtime; seed the cache for tests.
@@ -30,11 +33,11 @@ describe("format helpers", () => {
 });
 
 describe("trip validation", () => {
-  const T = { origin: "Dallas, TX", dest: "Minneapolis, MN", dep: "2026-10-15T06:00", load: "42,000" };
+  const T = { origin: "Dallas, TX", dest: "Minneapolis, MN", dep: depFromNow(3), load: "42,000" };
   it("accepts a valid trip", () => expect(isValidTrip(T)).toBe(true));
   it("rejects same origin/destination", () => expect(isValidTrip({ ...T, dest: "Dallas, TX" })).toBe(false));
   it("rejects out-of-range departure and load", () => {
-    expect(isValidTrip({ ...T, dep: "2026-10-20T06:00" })).toBe(false);
+    expect(isValidTrip({ ...T, dep: depFromNow(72) })).toBe(false); // beyond 48 h
     expect(isValidTrip({ ...T, load: "90,000" })).toBe(false);
   });
   it("surfaces suggestions for a typo", () => {

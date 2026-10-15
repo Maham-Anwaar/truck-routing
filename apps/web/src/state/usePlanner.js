@@ -5,8 +5,8 @@ import { heatRegion, buildHeatImage } from "../domain/heat.js";
 import { toLocalStr } from "../domain/format.js";
 import { isValidTrip } from "../domain/validation.js";
 
-// Departure defined in UTC (backend convention), shown in the viewer's tz.
-const DEP_DEFAULT = toLocalStr(Date.UTC(2026, 9, 15, 6, 0)); // Oct 15 06:00 UTC
+// Default departure: ~3 h from now, rounded to the next 15 min (always valid).
+const DEP_DEFAULT = toLocalStr(Math.ceil(Date.now() / 9e5) * 9e5 + 3 * 3.6e6);
 
 // First load starts empty — the user picks a trip. "Fill example" / the demo
 // trip is Dallas -> Minneapolis.
