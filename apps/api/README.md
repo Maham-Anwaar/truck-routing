@@ -12,7 +12,7 @@ responsibility — is specified in [`../../docs/API.md`](../../docs/API.md).
 | --- | --- | --- |
 | Routing (`/routes/plan` geometry + A/B/C) | synthetic (default) or **OpenRouteService** (`driving-hgv`) | `ORS_API_KEY` for ors |
 | Weather (`/routes/plan` checkpoints) | synthetic (default) or **Open-Meteo** (real, keyless) | none |
-| Weather (`/weather/field` heatmap grid) | always **synthetic** (a per-cell real grid isn't feasible) | none |
+| Weather (`/weather/field` heatmap grid) | **real but coarse** (Open-Meteo on a ~230-cell grid, blurred) | none |
 | Places (`/places`) | **`data/places.json`** (50 state capitals + demo cities) | none |
 
 Flip providers in `.env`: `ROUTING_PROVIDER=ors` (+ `ORS_API_KEY`) and/or

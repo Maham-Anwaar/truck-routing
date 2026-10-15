@@ -31,7 +31,7 @@ routing/
     weather.py     SyntheticWeatherProvider + OpenMeteoWeatherProvider
     route_source.py SyntheticRoutingProvider + OrsRoutingProvider
     planner.py     orchestration: sample routes → one weather call → rank
-    field.py       heatmap risk grid (always synthetic)
+    field.py       heatmap risk grid (uses the weather provider; coarsened grid)
 data/places.json   the place list served by /places
 ```
 

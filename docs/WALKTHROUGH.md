@@ -163,12 +163,16 @@ checkpoints. (Rendering detail, not something the API encodes — nice separatio
 **The heatmap:** backend returns a grid of risk levels over the area for each hour;
 the frontend fades it to the route corridor, colours it, and blurs it onto the map.
 
-👉 if they ask "why is the heatmap grid fake when the checkpoints are real?" →
-real answer: a real per-cell forecast is ~5,800 lookups *per frame* — no weather
-API does that. The **checkpoints that actually drive the decision are real**; the
-background heatmap is a smooth approximation. Approximating the *expensive,
-decision-irrelevant* part on purpose is the right call, and saying that out loud
-is the point.
+👉 if they ask "is the heatmap real?" → **yes, but coarse** — and there's a nice
+story here. A *fine* grid (0.2°) is ~5,800 cells, and a real per-cell forecast
+would be thousands of API lookups per frame — no point API does that. The
+insight: **Open-Meteo returns a location's *entire* 48-hour hourly forecast in one
+call.** So we fetch a **coarse** grid (~230 cells) in a **single batched call** —
+that's the whole real field, across space *and* all 48 hours — then upscale and
+blur it. So it's **coarse-but-real**, not fine-but-fake. You can't build it by
+interpolating the checkpoints, by the way, because the checkpoints are a
+space-*time* diagonal (position and clock advance together), not a snapshot — at
+any single hour you only have real weather for ~one point.
 
 **Now the smoothness story — learn this one, it's impressive:**
 
@@ -227,7 +231,7 @@ mention the trade-off, it sounds mature):
 |---|---|
 | Why backend-heavy? | One source of truth, map + ranking can't disagree, easy to test. Trade-off: frontend needs the API up. |
 | Why synthetic routing? | ORS free tier caps alternatives at 100 km, so long trips = 1 route; I need 3 to compare. Real roads come back by self-hosting or short trips. |
-| Why fake heatmap grid? | A real per-cell grid is ~5,800 lookups/frame — infeasible. The decision-driving checkpoints are real. |
+| Is the heatmap real? | Yes, but **coarse** — a fine grid is ~5,800 cells (infeasible), so I fetch a coarse ~230-cell grid in one call (Open-Meteo returns each cell's full 48h series) and blur it. Coarse-but-real. |
 | Why one big weather call? | 120 calls → 1; 38s → ~1s; dodges rate limits. |
 | Why sample at the ETA? | It's a *routing* tool — you want the weather *when the truck is there*. |
 | How'd you keep the slider smooth? | Fractional hour drives only the slider; map gets a rounded hour + is memoised; truck CSS-glides. |
@@ -241,8 +245,9 @@ mention the trade-off, it sounds mature):
   roads?" — "Correct, because the free routing tier won't give 3 alternatives on
   long trips; the real integration is there and swappable." Confident, not
   apologetic.
-- **The heatmap is an approximation.** Same energy — it's a deliberate call, not a
-  miss.
+- **The heatmap is real but coarse.** If they poke — "It's real Open-Meteo data on
+  a coarse grid, blurred; a fine real grid would be thousands of lookups per
+  frame." Deliberate, not a miss.
 - **It needs the backend running.** It's not a static demo; the frontend talks to
   Django for everything (places, routes, weather). If the API's down you get a
   "can't reach the service" screen — on purpose, no fake fallback data.

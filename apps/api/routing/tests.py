@@ -129,6 +129,7 @@ class PlanEndpointTests(SimpleTestCase):
         self.assertTrue(all(c["weather"] is None for c in cps if c["status"] == "no_data"))
 
 
+@override_settings(WEATHER_PROVIDER="synthetic")
 class WeatherFieldTests(SimpleTestCase):
     FIELD_REQ = {
         "bbox": {"south": 38.0, "west": -98.0, "north": 42.0, "east": -94.0},

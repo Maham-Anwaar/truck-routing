@@ -12,7 +12,7 @@ Swap via settings.WEATHER_PROVIDER ("synthetic" | "open_meteo").
 """
 
 import math
-from datetime import timezone
+from datetime import timedelta, timezone
 
 import requests
 from django.conf import settings
@@ -43,6 +43,10 @@ class SyntheticWeatherProvider:
     def forecast_many(self, points):
         return [self.forecast(lat, lon, t) for (lat, lon, t, _valid) in points]
 
+    def forecast_grid(self, cells, departure, hours):
+        # cells = [(lat, lon), ...]; hours = [0, 1, ...] offsets from departure.
+        return [[self.forecast(lat, lon, h) for h in hours] for (lat, lon) in cells]
+
 
 def _hour_index(times, valid_time):
     """Index of the hour matching valid_time in Open-Meteo's `time` array.
@@ -58,12 +62,11 @@ def _hour_index(times, valid_time):
 class OpenMeteoWeatherProvider:
     URL = "https://api.open-meteo.com/v1/forecast"
 
-    def forecast_many(self, points):
-        if not points:
-            return []
+    def _fetch(self, coords):
+        """One batched request -> the `hourly` block for each (lat, lon)."""
         params = {
-            "latitude": ",".join(f"{p[0]:.4f}" for p in points),
-            "longitude": ",".join(f"{p[1]:.4f}" for p in points),
+            "latitude": ",".join(f"{lat:.4f}" for lat, lon in coords),
+            "longitude": ",".join(f"{lon:.4f}" for lat, lon in coords),
             "hourly": "wind_gusts_10m,rain,snowfall",
             "wind_speed_unit": "mph",
             "precipitation_unit": "inch",  # rain -> in/hr; snowfall -> in/hr
@@ -75,18 +78,32 @@ class OpenMeteoWeatherProvider:
         data = resp.json()
         # One location -> dict; several -> list (comma-separated coords).
         locs = data if isinstance(data, list) else [data]
+        return [(locs[i] if i < len(locs) else locs[0])["hourly"] for i in range(len(coords))]
 
+    @staticmethod
+    def _at(hourly, idx):
+        return {
+            "wind_gust_mph": jround(hourly["wind_gusts_10m"][idx] or 0),
+            "rain_in_hr": round((hourly["rain"][idx] or 0), 2),
+            "snow_in_hr": round((hourly["snowfall"][idx] or 0), 1),
+        }
+
+    def forecast_many(self, points):
+        # points = [(lat, lon, t_hours, valid_time), ...] — one hour per point.
+        if not points:
+            return []
+        hourlies = self._fetch([(p[0], p[1]) for p in points])
+        return [self._at(h, _hour_index(h["time"], p[3])) for h, p in zip(hourlies, points)]
+
+    def forecast_grid(self, cells, departure, hours):
+        # cells = [(lat, lon), ...]; hours = [0, 1, ...] offsets. One call, full series.
+        if not cells:
+            return []
+        hourlies = self._fetch(cells)
         out = []
-        for i, p in enumerate(points):
-            hourly = (locs[i] if i < len(locs) else locs[0])["hourly"]
-            idx = _hour_index(hourly["time"], p[3])
-            out.append(
-                {
-                    "wind_gust_mph": jround(hourly["wind_gusts_10m"][idx] or 0),
-                    "rain_in_hr": round((hourly["rain"][idx] or 0), 2),
-                    "snow_in_hr": round((hourly["snowfall"][idx] or 0), 1),
-                }
-            )
+        for hourly in hourlies:
+            times = hourly["time"]
+            out.append([self._at(hourly, _hour_index(times, departure + timedelta(hours=h))) for h in hours])
         return out
 
 
